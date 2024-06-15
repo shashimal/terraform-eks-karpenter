@@ -1,1 +1,11 @@
 .terraform/*
+/.idea/modules.xml
+/.idea/vcs.xml
+/modules/karpenter/.terraform/modules/karpenter/
+/modules/karpenter/.terraform/modules/karpenter-crds/
+/.idea/.gitignore
+/modules/karpenter/.terraform/providers/registry.terraform.io/hashicorp/aws/5.54.0/darwin_arm64/LICENSE.txt
+/modules/karpenter/.terraform/modules/modules.json
+/terraform.tfstate.backup
+/.idea/terraform-eks-karpenter.iml
+/modules/karpenter/.terraform/providers/registry.terraform.io/hashicorp/aws/5.54.0/darwin_arm64/terraform-provider-aws_v5.54.0_x5
