@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cost-optimized-app
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: karpenter-demo
+  template:
+    metadata:
+      labels:
+        app: karpenter-demo
+    spec:
+      nodeSelector:  # <-- NodeSelector specified here
+        cost-optimized: "true"  # Matches the label in the NodePool template
+      tolerations:  # <-- Tolerations added here
+        - key: "deployment"
+          operator: "Equal"
+          value: "cost-optimized-spot-pool"
+          effect: "NoSchedule"
+      containers:
+        - name: karpenter-demo
+          image: nginx:latest
