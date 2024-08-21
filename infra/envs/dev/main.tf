@@ -35,7 +35,7 @@ module "eks_cluster" {
   source = "../../modules/eks/cluster"
 
   cluster_name    = local.app_name
-  cluster_version = "1.30"
+  cluster_version = "1.29"
 
   vpc_id                   = module.vpc.vpc_id
   subnet_ids               = module.vpc.private_subnets
@@ -57,4 +57,16 @@ module "eks_cluster" {
     Env                      = local.env
     "karpenter.sh/discovery" = local.app_name
   }
+}
+
+module "karpenter" {
+  source = "../../modules/eks/karpenter"
+
+  cluster_name = module.eks_cluster.cluster_name
+  karpenter_namespace = "karpenter"
+  oidc_provider_arn   = module.eks_cluster.oidc_provider_arn
+  cluster_endpoint = module.eks_cluster.cluster_endpoint
+  worker_iam_role_arn = aws_iam_role.workers.arn
+  karpenter_nodeclasses = local.karpenter_nodeclasses
+  karpenter_nodepools = local.karpenter_nodepools
 }
