@@ -1,3 +1,5 @@
+## Networking
+
 module "vpc" {
   source = "../../modules/vpc"
 
@@ -32,6 +34,7 @@ module "vpc" {
   }
 }
 
+## EKS cluster
 module "eks_cluster" {
   source = "../../modules/eks/cluster"
 
@@ -60,6 +63,7 @@ module "eks_cluster" {
   }
 }
 
+## Enable Karpenter for the EKS cluster
 module "karpenter" {
   source = "../../modules/eks/karpenter"
 
