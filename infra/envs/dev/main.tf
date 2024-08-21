@@ -28,6 +28,7 @@ module "vpc" {
     Name      = local.app_name
     Env       = local.env
     ManagedBy = "Terraform"
+    "karpenter.sh/discovery" = local.app_name
   }
 }
 
