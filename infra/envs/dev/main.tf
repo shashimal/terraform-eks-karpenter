@@ -29,5 +29,32 @@ module "vpc" {
     Env       = local.env
     ManagedBy = "Terraform"
   }
+}
 
+module "eks_cluster" {
+  source = "../../modules/eks/cluster"
+
+  cluster_name    = local.app_name
+  cluster_version = "1.30"
+
+  vpc_id                   = module.vpc.vpc_id
+  subnet_ids               = module.vpc.private_subnets
+  control_plane_subnet_ids = module.vpc.intra_subnets
+
+  cluster_endpoint_public_access = true
+
+  eks_managed_node_groups = {
+    karpenter = {
+      instance_types = ["t3.medium"]
+      min_size     = 2
+      max_size     = 3
+      desired_size = 2
+    }
+  }
+
+  tags = {
+    Name                     = local.app_name
+    Env                      = local.env
+    "karpenter.sh/discovery" = local.app_name
+  }
 }

@@ -18,6 +18,11 @@ output "public_subnets" {
   value = module.vpc.public_subnets
 }
 
+output "intra_subnets" {
+  description = "Intra subnet ids"
+  value = module.vpc.intra_subnets
+}
+
 output "vpc_owner_id" {
   description = "VPC owner id"
   value = module.vpc.vpc_owner_id
