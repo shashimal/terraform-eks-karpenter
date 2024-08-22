@@ -1,6 +1,7 @@
 locals {
   env                = "dev"
   app_name           = "student-mgr"
+  github_repo        = "shashimal/terraform-eks-karpenter"
   azs                = ["ap-southeast-1a", "ap-southeast-1b"]
   cidr               = "20.0.0.0/16"
   private_subnets    = ["20.0.0.0/19", "20.0.32.0/19"]

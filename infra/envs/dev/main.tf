@@ -65,22 +65,30 @@ module "eks_cluster" {
     }
   }
 
-tags = {
-  Name                     = local.app_name
-  Env                      = local.env
-  "karpenter.sh/discovery" = local.app_name
-}
+  tags = {
+    Name                     = local.app_name
+    Env                      = local.env
+    "karpenter.sh/discovery" = local.app_name
+  }
 }
 
 ## Enable Karpenter for the EKS cluster
 module "karpenter" {
-source = "../../modules/eks/karpenter"
+  source = "../../modules/eks/karpenter"
 
-cluster_name = module.eks_cluster.cluster_name
-karpenter_namespace = "karpenter"
-oidc_provider_arn = module.eks_cluster.oidc_provider_arn
-cluster_endpoint = module.eks_cluster.cluster_endpoint
-worker_iam_role_arn = aws_iam_role.workers.arn
-karpenter_nodeclasses = local.karpenter_nodeclasses
-karpenter_nodepools = local.karpenter_nodepools
+  cluster_name          = module.eks_cluster.cluster_name
+  karpenter_namespace   = "karpenter"
+  oidc_provider_arn     = module.eks_cluster.oidc_provider_arn
+  cluster_endpoint      = module.eks_cluster.cluster_endpoint
+  worker_iam_role_arn   = aws_iam_role.workers.arn
+  karpenter_nodeclasses = local.karpenter_nodeclasses
+  karpenter_nodepools   = local.karpenter_nodepools
+}
+
+# Create an IAM role for Github actions
+module "gha" {
+  source = "../../modules/gha"
+
+  app_name = local.app_name
+  github_repo = local.github_repo
 }
