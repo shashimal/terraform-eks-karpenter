@@ -85,10 +85,23 @@ module "karpenter" {
   karpenter_nodepools   = local.karpenter_nodepools
 }
 
+module "db" {
+  source = "../../modules/rds"
+
+  identifier     = "${local.app_name}-db"
+  instance_class = "db.t3.micro"
+
+  manage_master_user_password = true
+  username                    = "admin"
+
+  db_subnet_group_name = module.vpc.database_subnet_group
+  vpc_security_group_ids = [module.rds_security_group.security_group_id]
+}
+
 # Create an IAM role for Github actions
 module "gha" {
   source = "../../modules/gha"
 
-  app_name = local.app_name
+  app_name    = local.app_name
   github_repo = local.github_repo
 }
