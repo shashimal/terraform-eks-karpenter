@@ -7,3 +7,7 @@
 /infra/envs/dev/.terraform/providers/registry.terraform.io/hashicorp/aws/5.61.0/darwin_arm64/LICENSE.txt
 /infra/envs/dev/.terraform/providers/registry.terraform.io/hashicorp/kubernetes/2.31.0/darwin_arm64/LICENSE.txt
 /infra/envs/dev/.terraform/providers/registry.terraform.io/hashicorp/helm/2.14.0/darwin_arm64/LICENSE.txt
+/application/student-service/.idea/
+/application/student-service/.mvn/
+/application/student-frontend/.idea/
+/application/student-frontend/.idea/

@@ -5,3 +5,4 @@
 2. Setup EKS cluster with Karpenter support
 3. Setup Database
 4. Setup OIDC setup for Github actions
+5. Setup the application components

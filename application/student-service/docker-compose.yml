@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  mysqldb:
+    container_name: mysqldb
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=root
+      - MYSQL_USER=test
+      - MYSQL_PASSWORD=test@12345
+      - MYSQL_ROOT_HOST=%
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqldb:/var/lib/mysql
+  api:
+    container_name: api
+    image: student-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysqldb:3306/student?allowPublicKeyRetrieval=true&useSSL=false&createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_DATASOURCE_DRIVER-CLASS-NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    depends_on:
+      - mysqldb
+    ports:
+      - "8080:8080"
+
+volumes:
+  mysqldb:
