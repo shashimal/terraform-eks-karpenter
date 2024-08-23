@@ -85,6 +85,7 @@ module "karpenter" {
   karpenter_nodepools   = local.karpenter_nodepools
 }
 
+# Setup database
 module "db" {
   source = "../../modules/rds"
 
