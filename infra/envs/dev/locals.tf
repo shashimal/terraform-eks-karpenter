@@ -10,6 +10,13 @@ locals {
 
   policy_arn_prefix = "arn:${data.aws_partition.current.partition}:iam::aws:policy"
 
+  repository_map = {
+    student_service = {
+      name = "student-service"
+      repository_image_tag_mutability = "MUTABLE"
+    }
+  }
+
   karpenter_nodeclasses = [
     {
       nodeclass_name = "default"

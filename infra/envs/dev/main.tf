@@ -99,6 +99,12 @@ module "db" {
   vpc_security_group_ids = [module.rds_security_group.security_group_id]
 }
 
+module "ecr" {
+  source = "../../modules/ecr"
+
+  repository_map = local.repository_map
+}
+
 # Create an IAM role for Github actions
 module "gha" {
   source = "../../modules/gha"
