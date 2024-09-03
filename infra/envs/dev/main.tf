@@ -85,6 +85,15 @@ module "karpenter" {
   karpenter_nodepools   = local.karpenter_nodepools
 }
 
+# EKS cluster essentials
+module "eks_cluster_essentials" {
+  source = "../../modules/eks/essentials"
+
+  cluster_name      = module.eks_cluster.cluster_name
+  oidc_provider_arn = module.eks_cluster.oidc_provider_arn
+  namespace         = "default"
+}
+
 # Setup database
 module "db" {
   source = "../../modules/rds"
