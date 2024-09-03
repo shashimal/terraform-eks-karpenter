@@ -10,7 +10,7 @@ module "secret_manager_irsa_role" {
   oidc_providers = {
     ex = {
       provider_arn = var.oidc_provider_arn
-      namespace_service_accounts = ["${var.namespace}:SecretManagerServiceAccount"]
+      namespace_service_accounts = ["${var.namespace}:secret-manager-sa"]
     }
   }
 }

@@ -15,6 +15,9 @@ module "eks" {
   enable_cluster_creator_admin_permissions = true
 
   eks_managed_node_groups = var.eks_managed_node_groups
+  iam_role_additional_policies = {
+    additional = aws_iam_policy.cluster_additional_permission_policy.arn
+  }
 
   tags = var.tags
 }
