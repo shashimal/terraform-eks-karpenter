@@ -24,4 +24,8 @@ module "vpc" {
   public_subnet_tags  = var.public_subnet_tags
   private_subnet_tags = var.private_subnet_tags
   tags                = var.tags
+
+  enable_flow_log = false
+  create_flow_log_cloudwatch_iam_role = false
+  create_flow_log_cloudwatch_log_group = false
 }

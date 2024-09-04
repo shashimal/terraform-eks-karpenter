@@ -31,6 +31,9 @@ locals {
       karpenter_security_group_selector_maps = [
         {
           "id" = module.eks_cluster.cluster_primary_security_group_id
+        },
+        {
+          "id" = module.eks_cluster.node_security_group_id
         }
       ]
       karpenter_node_metadata_options = {
@@ -82,15 +85,19 @@ locals {
         {
           key      = "karpenter.k8s.aws/instance-category"
           operator = "In"
-          values = ["m"]
+          values = ["t"]
+        }, {
+          key      = "karpenter.k8s.aws/instance-family"
+          operator = "In"
+          values = ["t2"]
         }, {
           key      = "karpenter.k8s.aws/instance-cpu"
           operator = "In"
-          values = ["2"]
+          values = ["1"]
         }, {
           key      = "karpenter.k8s.aws/instance-generation"
           operator = "In"
-          values = ["1"]
+          values = ["2"]
         }, {
           key      = "karpenter.sh/capacity-type"
           operator = "In"
@@ -117,60 +124,60 @@ locals {
       ]
       karpenter_nodepool_weight = 10
     },
-    {
-      nodepool_name  = "cost-optimized-spot-pool"
-      nodeclass_name = "default"
-      karpenter_nodepool_node_labels = {
-        cost-optimized = "true"
-      }
-      karpenter_nodepool_annotations = {}
-      karpenter_nodepool_node_taints = [
-        {
-          key    = "deployment"
-          effect = "NoSchedule"
-          value  = "cost-optimized-spot-pool"
-        }
-      ]
-      karpenter_nodepool_startup_taints = []
-      karpenter_requirements = [
-        {
-          key      = "karpenter.k8s.aws/instance-category"
-          operator = "In"
-          values = ["t"]
-        }, {
-          key      = "karpenter.k8s.aws/instance-cpu"
-          operator = "In"
-          values = ["1"]
-        }, {
-          key      = "karpenter.k8s.aws/instance-generation"
-          operator = "In"
-          values = ["2"]
-        }, {
-          key      = "karpenter.sh/capacity-type"
-          operator = "In"
-          values = ["on-demand"]
-        }, {
-          key      = "kubernetes.io/arch"
-          operator = "In"
-          values = ["amd64"]
-        }, {
-          key      = "kubernetes.io/os"
-          operator = "In"
-          values = ["linux"]
-        }
-      ]
-      karpenter_nodepool_disruption = {
-        consolidation_policy = "WhenUnderutilized" # WhenUnderutilized or WhenEmpty
-        # consolidate_after    = "10m"               # Only used if consolidation_policy is WhenEmpty
-        expire_after         = "168h" # 7d | 168h | 1w
-      }
-      karpenter_nodepool_disruption_budgets = [
-        {
-          nodes = "10%"
-        }
-      ]
-      karpenter_nodepool_weight = 10
-    }
+#     {
+#       nodepool_name  = "cost-optimized-spot-pool"
+#       nodeclass_name = "default"
+#       karpenter_nodepool_node_labels = {
+#         cost-optimized = "true"
+#       }
+#       karpenter_nodepool_annotations = {}
+#       karpenter_nodepool_node_taints = [
+#         {
+#           key    = "deployment"
+#           effect = "NoSchedule"
+#           value  = "cost-optimized-spot-pool"
+#         }
+#       ]
+#       karpenter_nodepool_startup_taints = []
+#       karpenter_requirements = [
+#         {
+#           key      = "karpenter.k8s.aws/instance-category"
+#           operator = "In"
+#           values = ["t"]
+#         }, {
+#           key      = "karpenter.k8s.aws/instance-cpu"
+#           operator = "In"
+#           values = ["1"]
+#         }, {
+#           key      = "karpenter.k8s.aws/instance-generation"
+#           operator = "In"
+#           values = ["2"]
+#         }, {
+#           key      = "karpenter.sh/capacity-type"
+#           operator = "In"
+#           values = ["on-demand"]
+#         }, {
+#           key      = "kubernetes.io/arch"
+#           operator = "In"
+#           values = ["amd64"]
+#         }, {
+#           key      = "kubernetes.io/os"
+#           operator = "In"
+#           values = ["linux"]
+#         }
+#       ]
+#       karpenter_nodepool_disruption = {
+#         consolidation_policy = "WhenUnderutilized" # WhenUnderutilized or WhenEmpty
+#         # consolidate_after    = "10m"               # Only used if consolidation_policy is WhenEmpty
+#         expire_after         = "168h" # 7d | 168h | 1w
+#       }
+#       karpenter_nodepool_disruption_budgets = [
+#         {
+#           nodes = "10%"
+#         }
+#       ]
+#       karpenter_nodepool_weight = 10
+#     }
   ]
 
 }

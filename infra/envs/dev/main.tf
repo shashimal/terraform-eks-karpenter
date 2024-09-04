@@ -121,3 +121,7 @@ module "gha" {
   app_name    = local.app_name
   github_repo = local.github_repo
 }
+
+output "d" {
+  value = module.eks_cluster.node_security_group_id
+}

@@ -6,3 +6,4 @@
 3. Setup Database
 4. Setup OIDC setup for Github actions
 5. Setup the application components
+6. Setup Helm chart for application
