@@ -61,7 +61,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./application/student-service  # Path to the folder where your Dockerfile is
-          file: .//application/student-service/Dockerfile  # Path to your Dockerfile
+          file: ./application/student-service/Dockerfile  # Path to your Dockerfile
           push: true
           tags: |
             ${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_TAG }}
