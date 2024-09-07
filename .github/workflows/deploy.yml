@@ -56,3 +56,12 @@ jobs:
         with:
           version: latest
           endpoint: builders
+      # Step 4: Build and push the Docker image
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./application/student-service  # Path to the folder where your Dockerfile is
+          file: .//application/student-service/Dockerfile  # Path to your Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_TAG }}
