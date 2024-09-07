@@ -1,0 +1,21 @@
+name: Deploy EKS Application to Dev Environment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    environment: dev
+    runs-on: [ubuntu-latest]
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout
+
+
