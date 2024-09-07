@@ -3,7 +3,7 @@ name: Deploy EKS Application to Dev Environment
 on:
   push:
     branches:
-      - main
+      - eks-student-app
 
 jobs:
   build-and-push:
