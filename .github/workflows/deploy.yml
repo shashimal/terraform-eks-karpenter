@@ -25,4 +25,10 @@ jobs:
           role-session-name: gh-actions
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          registries: ${{ secrets.AWS_ACCOUNT_ID }}
+
 
