@@ -1,20 +1,66 @@
 locals {
-  env                = "dev"
-  app_name           = "student-mgr"
-  github_repo        = "shashimal/terraform-eks-karpenter"
-  azs                = ["ap-southeast-1a", "ap-southeast-1b"]
-  cidr               = "20.0.0.0/16"
-  private_subnets    = ["20.0.0.0/19", "20.0.32.0/19"]
-  public_subnets     = ["20.0.64.0/19", "20.0.96.0/19"]
-  database_subnets   = ["20.0.128.0/19", "20.0.160.0/19"]
+  env         = "dev"
+  app_name    = "student-mgr"
+  github_repo = "shashimal/terraform-eks-karpenter"
+  azs = ["ap-southeast-1a", "ap-southeast-1b"]
+  cidr        = "20.0.0.0/16"
+  private_subnets = ["20.0.0.0/19", "20.0.32.0/19"]
+  public_subnets = ["20.0.64.0/19", "20.0.96.0/19"]
+  database_subnets = ["20.0.128.0/19", "20.0.160.0/19"]
 
   policy_arn_prefix = "arn:${data.aws_partition.current.partition}:iam::aws:policy"
 
+  domain_name = "student-mgr.duleendra.com"
+
+  route53_zones = {
+    "student-mgr.duleendra.com" = {
+      comment = "student-mgr.duleendra.com"
+      tags = {
+        env = "production"
+      }
+    }
+  }
+
   repository_map = {
     student_service = {
-      name = "student-service"
+      name                            = "student-service"
       repository_image_tag_mutability = "MUTABLE"
     }
+  }
+
+  admin_role_arns = [
+    for parts in [for arn in data.aws_iam_roles.sso_admin_roles.arns : split("/", arn)] :
+    format("%s/%s", parts[0], element(parts, length(parts) - 1))
+  ]
+
+  access_entries = {
+
+    admin = {
+      principal_arn = one(data.aws_iam_roles.sso_admin_roles.arns)
+      policy_associations = {
+        admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+
+    developer = {
+      principal_arn = "arn:aws:iam::accont_id:role/developer-role"
+      policy_associations = {
+        admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminViewPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+
+
+
   }
 
   karpenter_nodeclasses = [
@@ -124,60 +170,59 @@ locals {
       ]
       karpenter_nodepool_weight = 10
     },
-#     {
-#       nodepool_name  = "cost-optimized-spot-pool"
-#       nodeclass_name = "default"
-#       karpenter_nodepool_node_labels = {
-#         cost-optimized = "true"
-#       }
-#       karpenter_nodepool_annotations = {}
-#       karpenter_nodepool_node_taints = [
-#         {
-#           key    = "deployment"
-#           effect = "NoSchedule"
-#           value  = "cost-optimized-spot-pool"
-#         }
-#       ]
-#       karpenter_nodepool_startup_taints = []
-#       karpenter_requirements = [
-#         {
-#           key      = "karpenter.k8s.aws/instance-category"
-#           operator = "In"
-#           values = ["t"]
-#         }, {
-#           key      = "karpenter.k8s.aws/instance-cpu"
-#           operator = "In"
-#           values = ["1"]
-#         }, {
-#           key      = "karpenter.k8s.aws/instance-generation"
-#           operator = "In"
-#           values = ["2"]
-#         }, {
-#           key      = "karpenter.sh/capacity-type"
-#           operator = "In"
-#           values = ["on-demand"]
-#         }, {
-#           key      = "kubernetes.io/arch"
-#           operator = "In"
-#           values = ["amd64"]
-#         }, {
-#           key      = "kubernetes.io/os"
-#           operator = "In"
-#           values = ["linux"]
-#         }
-#       ]
-#       karpenter_nodepool_disruption = {
-#         consolidation_policy = "WhenUnderutilized" # WhenUnderutilized or WhenEmpty
-#         # consolidate_after    = "10m"               # Only used if consolidation_policy is WhenEmpty
-#         expire_after         = "168h" # 7d | 168h | 1w
-#       }
-#       karpenter_nodepool_disruption_budgets = [
-#         {
-#           nodes = "10%"
-#         }
-#       ]
-#       karpenter_nodepool_weight = 10
-#     }
+    #     {
+    #       nodepool_name  = "cost-optimized-spot-pool"
+    #       nodeclass_name = "default"
+    #       karpenter_nodepool_node_labels = {
+    #         cost-optimized = "true"
+    #       }
+    #       karpenter_nodepool_annotations = {}
+    #       karpenter_nodepool_node_taints = [
+    #         {
+    #           key    = "deployment"
+    #           effect = "NoSchedule"
+    #           value  = "cost-optimized-spot-pool"
+    #         }
+    #       ]
+    #       karpenter_nodepool_startup_taints = []
+    #       karpenter_requirements = [
+    #         {
+    #           key      = "karpenter.k8s.aws/instance-category"
+    #           operator = "In"
+    #           values = ["t"]
+    #         }, {
+    #           key      = "karpenter.k8s.aws/instance-cpu"
+    #           operator = "In"
+    #           values = ["1"]
+    #         }, {
+    #           key      = "karpenter.k8s.aws/instance-generation"
+    #           operator = "In"
+    #           values = ["2"]
+    #         }, {
+    #           key      = "karpenter.sh/capacity-type"
+    #           operator = "In"
+    #           values = ["on-demand"]
+    #         }, {
+    #           key      = "kubernetes.io/arch"
+    #           operator = "In"
+    #           values = ["amd64"]
+    #         }, {
+    #           key      = "kubernetes.io/os"
+    #           operator = "In"
+    #           values = ["linux"]
+    #         }
+    #       ]
+    #       karpenter_nodepool_disruption = {
+    #         consolidation_policy = "WhenUnderutilized" # WhenUnderutilized or WhenEmpty
+    #         # consolidate_after    = "10m"               # Only used if consolidation_policy is WhenEmpty
+    #         expire_after         = "168h" # 7d | 168h | 1w
+    #       }
+    #       karpenter_nodepool_disruption_budgets = [
+    #         {
+    #           nodes = "10%"
+    #         }
+    #       ]
+    #       karpenter_nodepool_weight = 10
+    #     }
   ]
-
 }

@@ -16,3 +16,8 @@ data "aws_iam_policy_document" "ec2_assume_role_policy" {
     }
   }
 }
+
+data "aws_iam_roles" "sso_admin_roles" {
+  name_regex  = "AWSReservedSSO_AWSAdministratorAccess_.*"
+  path_prefix = "/aws-reserved/sso.amazonaws.com/"
+}

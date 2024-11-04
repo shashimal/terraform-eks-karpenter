@@ -12,7 +12,8 @@ module "eks" {
   subnet_ids               = var.subnet_ids
   control_plane_subnet_ids = var.control_plane_subnet_ids
 
-  enable_cluster_creator_admin_permissions = true
+  enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
+  access_entries = var.access_entries
 
   eks_managed_node_groups = var.eks_managed_node_groups
   iam_role_additional_policies = {

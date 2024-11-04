@@ -52,6 +52,18 @@ variable "cluster_security_group_additional_rules" {
   default     = {}
 }
 
+variable "enable_cluster_creator_admin_permissions" {
+  description = "Enable cluster creator admin permissions"
+  type = bool
+  default = true
+}
+
+variable "access_entries" {
+  description = "Map of access entries to add to the cluster"
+  type        = any
+  default     = {}
+}
+
 variable "tags" {
   description = "A map of tags to add to all resources"
   type        = map(string)

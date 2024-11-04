@@ -65,6 +65,9 @@ module "eks_cluster" {
     }
   }
 
+  access_entries = local.access_entries
+  enable_cluster_creator_admin_permissions = false
+
   tags = {
     Name                     = local.app_name
     Env                      = local.env
@@ -95,33 +98,60 @@ module "eks_cluster_essentials" {
 }
 
 # Setup database
-module "db" {
-  source = "../../modules/rds"
-
-  identifier     = "${local.app_name}-db"
-  instance_class = "db.t3.micro"
-
-  manage_master_user_password = true
-  username                    = "admin"
-
-  db_subnet_group_name = module.vpc.database_subnet_group
-  vpc_security_group_ids = [module.rds_security_group.security_group_id]
-}
-
-module "ecr" {
-  source = "../../modules/ecr"
-
-  repository_map = local.repository_map
-}
-
-# Create an IAM role for Github actions
-module "gha" {
-  source = "../../modules/gha"
-
-  app_name    = local.app_name
-  github_repo = local.github_repo
-}
-
-output "d" {
-  value = module.eks_cluster.node_security_group_id
-}
+# module "db" {
+#   source = "../../modules/rds"
+#
+#   identifier     = "${local.app_name}-db"
+#   instance_class = "db.t3.micro"
+#
+#   manage_master_user_password = true
+#   username                    = "admin"
+#
+#   db_subnet_group_name = module.vpc.database_subnet_group
+#   vpc_security_group_ids = [module.rds_security_group.security_group_id]
+# }
+#
+# module "ecr" {
+#   source = "../../modules/ecr"
+#
+#   repository_map = local.repository_map
+# }
+#
+# module "route53_zones" {
+#   source    = "../../modules/route53/zones"
+#   zones_map = local.route53_zones
+# }
+#
+# module "frontend_app" {
+#   source = "../../modules/static-webapp"
+#
+#   providers = {
+#     aws.us-east-1 = aws.us-east-1
+#   }
+#
+#   app_name    = local.app_name
+#   bucket_name = "${local.app_name}-fronend-app"
+#
+#   website = {
+#     index_document = "index.html"
+#     error_document = "index.html"
+#   }
+#
+#   domain_name               = local.domain_name
+#   aliases                   = [local.domain_name]
+#   subject_alternative_names = ["*.${local.domain_name}"]
+#   zone_id                   = module.route53_zones.zone_ids["student-mgr.duleendra.com"]
+#   depends_on = [module.route53_zones]
+# }
+#
+# # Create an IAM role for Github actions
+# module "gha" {
+#   source = "../../modules/gha"
+#
+#   app_name    = local.app_name
+#   github_repo = local.github_repo
+# }
+#
+# output "d" {
+#   value = module.eks_cluster.node_security_group_id
+# }
