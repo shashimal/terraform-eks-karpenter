@@ -11,3 +11,5 @@
 /application/student-service/.mvn/
 /application/student-frontend/.idea/
 /application/student-frontend/.idea/
+/infra/modules/*/.terraform
+ **/.terraform/*
