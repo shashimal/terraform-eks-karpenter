@@ -46,21 +46,17 @@ locals {
         }
       }
     }
-
-    developer = {
-      principal_arn = "arn:aws:iam::accont_id:role/developer-role"
-      policy_associations = {
-        admin = {
-          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminViewPolicy"
-          access_scope = {
-            type = "cluster"
-          }
-        }
-      }
-    }
-
-
-
+    # developer = {
+    #   principal_arn = "arn:aws:iam::accont_id:role/developer-role"
+    #   policy_associations = {
+    #     admin = {
+    #       policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminViewPolicy"
+    #       access_scope = {
+    #         type = "cluster"
+    #       }
+    #     }
+    #   }
+    # }
   }
 
   karpenter_nodeclasses = [
