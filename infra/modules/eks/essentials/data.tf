@@ -9,3 +9,16 @@ data "aws_iam_policy_document" "secret_manger_access_policy_document" {
     resources = ["*"]
   }
 }
+
+data "aws_iam_policy_document" "pod_s3_access" {
+  statement {
+    sid    = "S3Access"
+    effect = "Allow"
+
+    actions = [
+      "s3:*",
+    ]
+
+    resources = ["*"]
+  }
+}

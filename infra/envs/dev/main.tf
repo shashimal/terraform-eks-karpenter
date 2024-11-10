@@ -37,7 +37,8 @@ module "vpc" {
 module "eks_cluster" {
   source = "../../modules/eks/cluster"
 
-  cluster_name    = local.app_name
+  cluster_name    = "${local.app_name}-cluster"
+  app_name = local.app_name
   cluster_version = "1.29"
 
   vpc_id                   = module.vpc.vpc_id
@@ -65,8 +66,11 @@ module "eks_cluster" {
     }
   }
 
-  access_entries = local.access_entries
-  enable_cluster_creator_admin_permissions = false
+  #access_entries = local.access_entries
+  enable_cluster_creator_admin_permissions = true
+  cluster_addons = {
+    eks-pod-identity-agent = {}
+  }
 
   tags = {
     Name                     = local.app_name
@@ -93,8 +97,9 @@ module "eks_cluster_essentials" {
   source = "../../modules/eks/essentials"
 
   cluster_name      = module.eks_cluster.cluster_name
+  app_name = local.app_name
   oidc_provider_arn = module.eks_cluster.oidc_provider_arn
-  namespace         = "default"
+  namespace         = local.app_namespace
 }
 
 # Setup database

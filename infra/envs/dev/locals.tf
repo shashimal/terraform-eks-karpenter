@@ -1,7 +1,7 @@
 locals {
   ##App Configuration
   env         = "dev"
-  app_name    = "student-mgr"
+  app_name    = "student"
   policy_arn_prefix = "arn:${data.aws_partition.current.partition}:iam::aws:policy"
 
   ##VPC Configuration
@@ -12,10 +12,10 @@ locals {
   database_subnets = ["20.0.128.0/19", "20.0.160.0/19"]
 
   ##Route53 Configuration
-  domain_name = "student-mgr.duleendra.com"
+  domain_name = "student.duleendra.com"
   route53_zones = {
     "student-mgr.duleendra.com" = {
-      comment = "student-mgr.duleendra.com"
+      comment = "student.duleendra.com"
       tags = {
         env = "production"
       }
@@ -34,6 +34,8 @@ locals {
   }
 
   ## EKS Configuration
+  app_namespace = "student"
+
   access_entries = {
     admin = {
       principal_arn = one(data.aws_iam_roles.sso_admin_roles.arns)

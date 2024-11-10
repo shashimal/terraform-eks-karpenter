@@ -4,6 +4,12 @@ variable "cluster_name" {
   default     = ""
 }
 
+variable "app_name" {
+  description = "Application name"
+  type        = string
+  default = null
+}
+
 variable "cluster_version" {
   description = "Kubernetes `<major>.<minor>` version to use for the EKS cluster (i.e.: `1.27`)"
   type        = string
@@ -60,6 +66,12 @@ variable "enable_cluster_creator_admin_permissions" {
 
 variable "access_entries" {
   description = "Map of access entries to add to the cluster"
+  type        = any
+  default     = {}
+}
+
+variable "cluster_addons" {
+  description = "Cluster addon configuration to be provided to all Kubernetes addons"
   type        = any
   default     = {}
 }

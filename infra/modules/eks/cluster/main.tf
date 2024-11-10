@@ -15,6 +15,8 @@ module "eks" {
   enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
   access_entries = var.access_entries
 
+  cluster_addons = var.cluster_addons
+
   eks_managed_node_groups = var.eks_managed_node_groups
   iam_role_additional_policies = {
     additional = aws_iam_policy.cluster_additional_permission_policy.arn
