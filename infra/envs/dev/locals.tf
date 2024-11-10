@@ -1,17 +1,18 @@
 locals {
+  ##App Configuration
   env         = "dev"
   app_name    = "student-mgr"
-  github_repo = "shashimal/terraform-eks-karpenter"
+  policy_arn_prefix = "arn:${data.aws_partition.current.partition}:iam::aws:policy"
+
+  ##VPC Configuration
   azs = ["ap-southeast-1a", "ap-southeast-1b"]
   cidr        = "20.0.0.0/16"
   private_subnets = ["20.0.0.0/19", "20.0.32.0/19"]
   public_subnets = ["20.0.64.0/19", "20.0.96.0/19"]
   database_subnets = ["20.0.128.0/19", "20.0.160.0/19"]
 
-  policy_arn_prefix = "arn:${data.aws_partition.current.partition}:iam::aws:policy"
-
+  ##Route53 Configuration
   domain_name = "student-mgr.duleendra.com"
-
   route53_zones = {
     "student-mgr.duleendra.com" = {
       comment = "student-mgr.duleendra.com"
@@ -21,6 +22,10 @@ locals {
     }
   }
 
+  #Github Configuration
+  github_repo = "shashimal/terraform-eks-karpenter"
+
+  #ECR Configuration
   repository_map = {
     student_service = {
       name                            = "student-service"
@@ -28,13 +33,8 @@ locals {
     }
   }
 
-  admin_role_arns = [
-    for parts in [for arn in data.aws_iam_roles.sso_admin_roles.arns : split("/", arn)] :
-    format("%s/%s", parts[0], element(parts, length(parts) - 1))
-  ]
-
+  ## EKS Configuration
   access_entries = {
-
     admin = {
       principal_arn = one(data.aws_iam_roles.sso_admin_roles.arns)
       policy_associations = {
