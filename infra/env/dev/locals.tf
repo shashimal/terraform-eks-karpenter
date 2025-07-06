@@ -1,10 +1,14 @@
 locals {
   app_name = "student-management-sys"
+
   env      = "dev"
+
   common_tags = {
     Name = local.app_name
     env  = local.env
   }
+
+  github_repo = "shashimal/eks-app"
 
   #VPC
   azs              = ["ap-southeast-1a", "ap-southeast-1b"]
