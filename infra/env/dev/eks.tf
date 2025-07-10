@@ -25,6 +25,8 @@ locals {
   enable_pod_identity = false
 }
 
+####################### Setup EKS Cluster ###################################
+#############################################################################
 module "eks" {
   source = "../../../modules/eks/cluster"
 
