@@ -1,0 +1,11 @@
+#student-service:
+#  image:
+#    repository: your-dockerhub/student-service
+#    tag: v1.0
+#  replicaCount: 2
+#
+#course-service:
+#  image:
+#    repository: your-dockerhub/course-service
+#    tag: v1.0
+#  replicaCount: 1

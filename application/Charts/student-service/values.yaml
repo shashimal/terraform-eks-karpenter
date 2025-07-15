@@ -1,0 +1,10 @@
+replicaCount: 1
+image:
+  repository: "970508865677.dkr.ecr.ap-southeast-1.amazonaws.com/cue/cue-stg:latest"
+  tag: latest
+  pullPolicy: IfNotPresent
+service:
+  name: student
+  namespace: student
+  type: ClusterIP
+  port: 80

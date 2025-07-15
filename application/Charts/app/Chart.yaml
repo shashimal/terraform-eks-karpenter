@@ -1,0 +1,10 @@
+apiVersion: v2
+name: app
+version: 0.1.0
+dependencies:
+  - name: student-service
+    version: 0.1.0
+    repository: "file://../student-service"
+  - name: course-service
+    version: 0.1.0
+    repository: "file://../course-service"
