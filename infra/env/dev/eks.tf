@@ -28,7 +28,7 @@ locals {
 ####################### Setup EKS Cluster ###################################
 #############################################################################
 module "eks" {
-  source = "../../../modules/eks/cluster"
+  source = "../../modules/eks/cluster"
 
   cluster_name    = local.app_name
   cluster_version = "1.32"

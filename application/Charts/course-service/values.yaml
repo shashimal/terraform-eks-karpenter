@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  repository: "970508865677.dkr.ecr.ap-southeast-1.amazonaws.com/cue/cue-stg:latest"
+  repository: "793209430381.dkr.ecr.ap-southeast-1.amazonaws.com/course-service:latest"
   tag: latest
   pullPolicy: IfNotPresent
 service:

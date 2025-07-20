@@ -1,7 +1,7 @@
 ####################### Setup VPC ###################################
 ######################################################################
 module "vpc" {
-  source = "../../../modules/network/vpc"
+  source = "../../modules/network/vpc"
 
   name = local.app_name
   azs  = local.azs
@@ -31,7 +31,7 @@ module "vpc" {
 ####################### Setup ECR Repositories #######################
 ######################################################################
 module "ecr" {
-  source = "../../../modules/ecr"
+  source = "../../modules/ecr"
 
   for_each = local.ecr_repositories
 
@@ -43,7 +43,7 @@ module "ecr" {
 ####################### Setup GitHub Action Role for App Deployment #######################
 ##########################################################################################
 module "gha" {
-  source = "../../../modules/cicd"
+  source = "../../modules/cicd"
 
   app_name = local.app_name
   github_repo = local.github_repo

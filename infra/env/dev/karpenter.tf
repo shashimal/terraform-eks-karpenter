@@ -122,7 +122,7 @@ locals {
 
 #Setup Karpenter
 module "karpenter" {
-  source = "../../../modules/eks/karpenter"
+  source = "../../modules/eks/karpenter"
 
   count = local.enable_karpenter ? 1 : 0
 
