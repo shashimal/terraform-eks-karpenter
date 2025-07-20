@@ -19,3 +19,7 @@ terraform.tfstate.backup
 /infra/modules/ecr/.terraform.lock.hcl
 /infra/modules/**/.terraform/
 /infra/modules/**/.terraform.lock.hcl
+/application/Charts/app/charts/*.tgz
+/application/Charts/app/Chart.lock
+aws.xml
+.idea/
