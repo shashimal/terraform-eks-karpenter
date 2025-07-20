@@ -15,4 +15,3 @@ terraform.tfstate.backup
 /infra/env/dev/base/terraform.tfstate
 /infra/env/dev/base/terraform.tfstate.backup
 /infra/env/dev/.terraform/
-/infra/modules/
