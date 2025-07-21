@@ -1,0 +1,12 @@
+replicaCount: 1
+image:
+  #repository: "793209430381.dkr.ecr.ap-southeast-1.amazonaws.com/course-service:latest"
+  repository: "shashimald/course-service:latest"
+  tag: latest
+  pullPolicy: Always
+service:
+  name: course
+  namespace: course
+  type: ClusterIP
+  targetPort: 8081
+  port: 80
