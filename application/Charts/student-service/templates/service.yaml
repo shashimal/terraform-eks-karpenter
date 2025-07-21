@@ -11,4 +11,4 @@ spec:
     app: {{.Values.service.name}}
   ports:
     - port: {{.Values.service.port}}
-      targetPort: {{.Values.service.port}}
+      targetPort: {{.Values.service.targetPort}}
