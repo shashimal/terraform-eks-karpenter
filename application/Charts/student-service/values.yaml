@@ -5,7 +5,7 @@ image:
   tag: latest
   pullPolicy: Always
 service:
-  name: student
+  name: student-service
   namespace: student
   type: ClusterIP
   targetPort: 8082

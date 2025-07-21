@@ -5,7 +5,7 @@ image:
   tag: latest
   pullPolicy: Always
 service:
-  name: course
+  name: course-service
   namespace: course
   type: ClusterIP
   targetPort: 8081

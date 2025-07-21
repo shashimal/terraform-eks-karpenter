@@ -8,3 +8,6 @@ dependencies:
   - name: course-service
     version: 0.1.0
     repository: "file://../course-service"
+  - name: frontend-service
+    version: 0.1.0
+    repository: "file://../frontend-service"

@@ -6,7 +6,7 @@ export default function StudentInfoApp() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:8082/students')
+    fetch('http://student/students')
       .then(response => response.json())
       .then(data => {
         setStudents(data.students);
