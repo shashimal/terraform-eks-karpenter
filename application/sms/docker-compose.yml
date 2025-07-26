@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+
+  student-service:
+    build:
+      context: ./student-service
+      dockerfile: Dockerfile
+    image: shashimald/student-service:v1.0.0
+    container_name: student-service
+    ports:
+      - "3001:3001"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/student-db
+      - PORT=3001
+    depends_on:
+      - mongodb
+    volumes:
+      - student_uploads:/app/uploads
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  course-service:
+    build:
+      context: ./course-service
+      dockerfile: Dockerfile
+    image: shashimald/course-service:v1.0.0
+    container_name: course-service
+    ports:
+      - "3002:3002"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/course-db
+      - PORT=3002
+    depends_on:
+      - mongodb
+      - student-service
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    image: shashimald/auth-service:v1.0.0
+    container_name: auth-service
+    ports:
+      - "3003:3003"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/auth-db
+      - PORT=3003
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+    restart: unless-stopped
+    command: >
+      sh -c "npm run create-admin && npm start"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: shashimald/frontend-service:v1.0.0
+    container_name: frontend
+    ports:
+      - "80:80"
+    environment:
+      - REACT_APP_STUDENT_API_URL=http://localhost:3001/api/students
+      - REACT_APP_COURSE_API_URL=http://localhost:3002/api/courses
+      - REACT_APP_AUTH_API_URL=http://localhost:3003/api/auth
+    depends_on:
+      - student-service
+      - course-service
+      - auth-service
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+  student_uploads:
