@@ -1,0 +1,24 @@
+image:
+  repository: mongo
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+mongodb:
+  port: 27017
+
+service:
+  type: ClusterIP
+  port: 27017
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: ""
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi

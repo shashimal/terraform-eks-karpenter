@@ -1,0 +1,12 @@
+1. MongoDB has been deployed as a StatefulSet.
+
+2. To connect to MongoDB from within the cluster:
+   kubectl run mongodb-client --rm --tty -i --restart='Never' --image mongo:latest --command -- mongosh --host {{ include "mongodb.fullname" . }} --port {{ .Values.mongodb.port }}
+
+3. To connect from outside the cluster:
+   kubectl port-forward svc/{{ include "mongodb.fullname" . }} {{ .Values.mongodb.port }}:{{ .Values.mongodb.port }}
+
+4. Check the status of your StatefulSet:
+   kubectl get statefulset {{ include "mongodb.fullname" . }} -n {{ .Release.Namespace }}
+
+MongoDB has been deployed successfully!

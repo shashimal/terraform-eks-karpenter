@@ -1,0 +1,9 @@
+dependencies:
+- name: mongodb
+  repository: file://../mongodb
+  version: 0.1.0
+- name: course-service
+  repository: file://../course-service
+  version: 0.1.0
+digest: sha256:adc0bc13a3d3bc2737cc943d1cd1e3ec466f63857e15a546d5efd91b68288014
+generated: "2025-07-26T21:14:41.197345+08:00"

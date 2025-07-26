@@ -1,0 +1,56 @@
+# SMS Application Umbrella Chart Values
+
+# Global values that can be shared across all subcharts
+global:
+  namespace: sms-app
+
+# MongoDB configuration
+mongodb:
+  enabled: true
+  image:
+    repository: mongo
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  mongodb:
+    port: 27017
+  service:
+    type: ClusterIP
+    port: 27017
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: ""
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+# Course Service configuration
+course-service:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: shashimald/course-service
+    tag: "v1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 3002
+  # MongoDB connection details for init container
+  mongodb:
+    host: "sms-mongodb"
+    port: 27017
+  env:
+    MONGODB_URI: "mongodb://sms-mongodb:27017/course-db"
+    PORT: "3002"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi

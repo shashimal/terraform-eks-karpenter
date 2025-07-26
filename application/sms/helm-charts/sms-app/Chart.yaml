@@ -1,0 +1,16 @@
+apiVersion: v2
+name: sms-app
+description: SMS Application Umbrella Chart
+type: application
+version: 0.1.0
+appVersion: "v1.0.0"
+
+dependencies:
+  - name: mongodb
+    version: "0.1.0"
+    repository: "file://../mongodb"
+    condition: mongodb.enabled
+  - name: course-service
+    version: "0.1.0"
+    repository: "file://../course-service"
+    condition: course-service.enabled
