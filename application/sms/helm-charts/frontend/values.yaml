@@ -1,0 +1,39 @@
+replicaCount: 1
+
+image:
+  repository: shashimald/frontend-service
+  tag: "v1.0.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+
+# Environment variables for API endpoints
+env:
+  REACT_APP_STUDENT_API_URL: "http://sms-student-service/api/students"
+  REACT_APP_COURSE_API_URL: "http://sms-course-service/api/courses"
+  REACT_APP_AUTH_API_URL: "http://sms-auth-service/api/auth"
+
+# Ingress configuration for Minikube
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  hosts:
+    - host: sms-app.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

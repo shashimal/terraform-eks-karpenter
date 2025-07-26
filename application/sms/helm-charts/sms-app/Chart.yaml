@@ -14,3 +14,15 @@ dependencies:
     version: "0.1.0"
     repository: "file://../course-service"
     condition: course-service.enabled
+  - name: student-service
+    version: "0.1.0"
+    repository: "file://../student-service"
+    condition: student-service.enabled
+  - name: auth-service
+    version: "0.1.0"
+    repository: "file://../auth-service"
+    condition: auth-service.enabled
+  - name: frontend
+    version: "0.1.0"
+    repository: "file://../frontend"
+    condition: frontend.enabled

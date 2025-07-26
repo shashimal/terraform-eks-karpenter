@@ -54,3 +54,100 @@ course-service:
     requests:
       cpu: 250m
       memory: 256Mi
+
+# Student Service configuration
+student-service:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: shashimald/student-service
+    tag: "v1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 3001
+  # MongoDB connection details for init container
+  mongodb:
+    host: "sms-mongodb"
+    port: 27017
+  env:
+    MONGODB_URI: "mongodb://sms-mongodb:27017/student-db"
+    PORT: "3001"
+  # Persistent volume for file uploads
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: ""
+    accessMode: ReadWriteOnce
+    mountPath: /app/uploads
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+# Auth Service configuration
+auth-service:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: shashimald/auth-service
+    tag: "v1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 3003
+  # MongoDB connection details for init container
+  mongodb:
+    host: "sms-mongodb"
+    port: 27017
+  env:
+    MONGODB_URI: "mongodb://sms-mongodb:27017/auth-db"
+    PORT: "3003"
+    JWT_SECRET: "your-super-secret-jwt-key-change-in-production"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+# Frontend Service configuration
+frontend:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: shashimald/frontend-service
+    tag: "v1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 80
+  env:
+    REACT_APP_STUDENT_API_URL: "http://sms-student-service/api/students"
+    REACT_APP_COURSE_API_URL: "http://sms-course-service/api/courses"
+    REACT_APP_AUTH_API_URL: "http://sms-auth-service/api/auth"
+  # Ingress configuration for Minikube
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    hosts:
+      - host: sms-app.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi

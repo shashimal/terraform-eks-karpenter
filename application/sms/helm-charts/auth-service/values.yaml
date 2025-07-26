@@ -1,14 +1,14 @@
 replicaCount: 1
 
 image:
-  repository: shashimald/course-service
+  repository: shashimald/auth-service
   tag: "v1.0.0"
   pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP
   port: 80
-  targetPort: 3002
+  targetPort: 3003
 
 # MongoDB connection details
 mongodb:
@@ -16,8 +16,9 @@ mongodb:
   port: 27017
 
 env:
-  MONGODB_URI: "mongodb://sms-mongodb:27017/course-db"
-  PORT: "3002"
+  MONGODB_URI: "mongodb://sms-mongodb:27017/auth-db"
+  PORT: "3003"
+  JWT_SECRET: "your-super-secret-jwt-key-change-in-production"
 
 resources:
   limits:

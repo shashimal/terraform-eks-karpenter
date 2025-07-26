@@ -5,5 +5,14 @@ dependencies:
 - name: course-service
   repository: file://../course-service
   version: 0.1.0
-digest: sha256:adc0bc13a3d3bc2737cc943d1cd1e3ec466f63857e15a546d5efd91b68288014
-generated: "2025-07-26T21:14:41.197345+08:00"
+- name: student-service
+  repository: file://../student-service
+  version: 0.1.0
+- name: auth-service
+  repository: file://../auth-service
+  version: 0.1.0
+- name: frontend
+  repository: file://../frontend
+  version: 0.1.0
+digest: sha256:f06e9475e6c2e8d0074506fe74e7d899a78f3fe80af02b418622ecfd407b2c4e
+generated: "2025-07-26T23:12:26.578561+08:00"
