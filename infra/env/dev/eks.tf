@@ -2,11 +2,11 @@ locals {
 
   #EKS
   eks_managed_node_groups = {
-    karpenter  = {
-      name         = "karpenter"
-      max_size     = 3
-      desired_size = 2
-      min_size     = 2
+    karpenter = {
+      name           = "karpenter"
+      max_size       = 3
+      desired_size   = 2
+      min_size       = 2
       instance_types = ["t3.medium"]
 
       taints = {
@@ -21,7 +21,7 @@ locals {
     }
   }
 
-  enable_karpenter = true
+  enable_karpenter    = true
   enable_pod_identity = false
 }
 
@@ -43,10 +43,10 @@ module "eks" {
   bootstrap_self_managed_addons = true
 
   cluster_addons = {
-    coredns = {}
+    coredns                = {}
     eks-pod-identity-agent = {}
-    kube-proxy = {}
-    vpc-cni = {}
+    kube-proxy             = {}
+    vpc-cni                = {}
   }
 
   eks_managed_node_groups = local.eks_managed_node_groups

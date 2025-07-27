@@ -45,6 +45,6 @@ module "ecr" {
 module "gha" {
   source = "../../modules/cicd"
 
-  app_name = local.app_name
+  app_name    = local.app_name
   github_repo = local.github_repo
 }

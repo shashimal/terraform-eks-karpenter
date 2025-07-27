@@ -16,7 +16,7 @@ resource "aws_iam_role_policy_attachment" "workers" {
     "${local.policy_arn_prefix}/AmazonEC2ContainerRegistryReadOnly",
     "${local.policy_arn_prefix}/AmazonSSMManagedInstanceCore",
     "${local.policy_arn_prefix}/AmazonEKS_CNI_Policy",
-  ]),[])
+  ]), [])
 
   policy_arn = each.value
   role       = aws_iam_role.workers.name

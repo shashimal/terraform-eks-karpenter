@@ -1,7 +1,7 @@
 locals {
   app_name = "student-management-sys"
 
-  env      = "dev"
+  env = "dev"
 
   common_tags = {
     Name = local.app_name
