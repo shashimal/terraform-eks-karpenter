@@ -18,6 +18,9 @@ mongodb:
 env:
   MONGODB_URI: "mongodb://sms-mongodb:27017/course-db"
   PORT: "3002"
+  LOG_LEVEL: "info"
+  DISABLE_HEALTH_LOGS: "true"
+  NODE_ENV: "production"
 
 resources:
   limits:

@@ -34,7 +34,7 @@ course-service:
   replicaCount: 1
   image:
     repository: shashimald/course-service
-    tag: "v1.0.0"
+    tag: "v1.0.2"
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
@@ -47,6 +47,9 @@ course-service:
   env:
     MONGODB_URI: "mongodb://sms-mongodb:27017/course-db"
     PORT: "3002"
+    LOG_LEVEL: "info"
+    DISABLE_HEALTH_LOGS: "true"
+    NODE_ENV: "production"
   resources:
     limits:
       cpu: 500m
@@ -74,6 +77,9 @@ student-service:
   env:
     MONGODB_URI: "mongodb://sms-mongodb:27017/student-db"
     PORT: "3001"
+    LOG_LEVEL: "info"
+    DISABLE_HEALTH_LOGS: "true"
+    NODE_ENV: "production"
   # Persistent volume for file uploads
   persistence:
     enabled: true
@@ -108,6 +114,9 @@ auth-service:
     MONGODB_URI: "mongodb://sms-mongodb:27017/auth-db"
     PORT: "3003"
     JWT_SECRET: "your-super-secret-jwt-key-change-in-production"
+    LOG_LEVEL: "info"
+    DISABLE_HEALTH_LOGS: "true"
+    NODE_ENV: "production"
   resources:
     limits:
       cpu: 500m

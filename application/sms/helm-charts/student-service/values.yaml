@@ -18,6 +18,9 @@ mongodb:
 env:
   MONGODB_URI: "mongodb://sms-mongodb:27017/student-db"
   PORT: "3001"
+  LOG_LEVEL: "info"
+  DISABLE_HEALTH_LOGS: "true"
+  NODE_ENV: "production"
 
 # Persistent volume for file uploads
 persistence:
