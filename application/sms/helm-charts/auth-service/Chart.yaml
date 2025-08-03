@@ -1,6 +1,11 @@
 apiVersion: v2
 name: auth-service
-description: Auth Service for SMS Application
+description: Authentication Service for SMS Application
 type: application
 version: 0.1.0
-appVersion: "v1.0.0"
+appVersion: "1.0.0"
+keywords:
+  - auth
+  - authentication
+  - microservice
+  - sms-app

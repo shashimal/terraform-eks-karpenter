@@ -1,26 +1,34 @@
-replicaCount: 1
+# Default values for course-service.
+replicaCount: 2
 
 image:
-  repository: shashimald/course-service
-  tag: "v1.0.0"
+  repository: course-service
   pullPolicy: IfNotPresent
+  tag: "latest"
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
 
 service:
   type: ClusterIP
-  port: 80
-  targetPort: 3002
+  port: 8081
 
-# MongoDB connection details
-mongodb:
-  host: "sms-mongodb"
-  port: 27017
-
-env:
-  MONGODB_URI: "mongodb://sms-mongodb:27017/course-db"
-  PORT: "3002"
-  LOG_LEVEL: "info"
-  DISABLE_HEALTH_LOGS: "true"
-  NODE_ENV: "production"
+ingress:
+  enabled: false
+  ingressClassName: ""
+  annotations: {}
+  hosts:
+    - host: courses.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
 
 resources:
   limits:
@@ -29,3 +37,33 @@ resources:
   requests:
     cpu: 250m
     memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+# Environment variables
+env:
+  - name: PORT
+    value: "8081"
+  - name: NODE_ENV
+    value: "production"
+
+# Health check configuration
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /ready
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5

@@ -12,7 +12,8 @@ frontend:
   replicaCount: 1 # Single replica for local dev
 
   image:
-    tag: "1.21"
+    repository: shashimald/frontend-service
+    tag: "v1.0.0"
     pullPolicy: IfNotPresent
 
   service:
@@ -78,7 +79,8 @@ mongodb:
     size: 1Gi # Very small storage for local dev
     accessModes:
       - ReadWriteOnce
-    # Use default storage class (usually hostpath in minikube)
+    # Override AWS gp2 storage class with minikube's default
+    storageClass: "standard" # Minikube's default storage class
 
   resources:
     # Minimal resources for local development
@@ -88,6 +90,123 @@ mongodb:
     requests:
       cpu: 100m
       memory: 128Mi
+
+  # Disable health checks for faster startup in local dev
+  livenessProbe:
+    enabled: false
+  readinessProbe:
+    enabled: false
+
+# Auth Service Configuration for Local Development
+auth-service:
+  replicaCount: 1 # Single replica for local dev
+
+  image:
+    repository: shashimald/auth-service
+    tag: "v1.0.0"
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  resources:
+    # Minimal resources for local development
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  autoscaling:
+    enabled: false # No autoscaling in local dev
+
+  env:
+    - name: PORT
+      value: "8080"
+    - name: NODE_ENV
+      value: "development"
+    - name: MONGODB_URI
+      value: "mongodb://admin:password123@mongodb:27017/smsapp"
+
+  # Disable health checks for faster startup in local dev
+  livenessProbe:
+    enabled: false
+  readinessProbe:
+    enabled: false
+
+# Course Service Configuration for Local Development
+course-service:
+  replicaCount: 1 # Single replica for local dev
+
+  image:
+    repository: shashimald/course-service
+    tag: "v1.0.2"
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 8081
+
+  resources:
+    # Minimal resources for local development
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  autoscaling:
+    enabled: false # No autoscaling in local dev
+
+  env:
+    - name: PORT
+      value: "8081"
+    - name: NODE_ENV
+      value: "development"
+    - name: MONGODB_URI
+      value: "mongodb://admin:password123@mongodb:27017/smsapp"
+
+  # Disable health checks for faster startup in local dev
+  livenessProbe:
+    enabled: false
+  readinessProbe:
+    enabled: false
+
+# Student Service Configuration for Local Development
+student-service:
+  replicaCount: 1 # Single replica for local dev
+
+  image:
+    repository: shashimald/student-service
+    tag: "v1.0.0"
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 8082
+
+  resources:
+    # Minimal resources for local development
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  autoscaling:
+    enabled: false # No autoscaling in local dev
+
+  env:
+    - name: PORT
+      value: "8082"
+    - name: NODE_ENV
+      value: "development"
+    - name: MONGODB_URI
+      value: "mongodb://admin:password123@mongodb:27017/smsapp"
 
   # Disable health checks for faster startup in local dev
   livenessProbe:

@@ -1,6 +1,11 @@
 apiVersion: v2
 name: course-service
-description: Course Service for SMS Application
+description: Course Management Service for SMS Application
 type: application
 version: 0.1.0
-appVersion: "v1.0.0"
+appVersion: "1.0.0"
+keywords:
+  - course
+  - management
+  - microservice
+  - sms-app
