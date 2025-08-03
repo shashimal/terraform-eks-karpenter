@@ -1,65 +1,57 @@
-SMS Application has been deployed!
+🚀 SMS Application has been deployed!
 
-Components deployed:
-{{- if .Values.mongodb.enabled }}
-- MongoDB StatefulSet
-{{- end }}
-{{- if index .Values "course-service" "enabled" }}
-- Course Service
-{{- end }}
-{{- if index .Values "student-service" "enabled" }}
-- Student Service
-{{- end }}
-{{- if index .Values "auth-service" "enabled" }}
-- Auth Service
-{{- end }}
-{{- if index .Values "frontend" "enabled" }}
-- Frontend Service
+📋 Deployment Summary:
+- Release Name: {{ .Release.Name }}
+- Namespace: {{ .Release.Namespace }}
+- Environment: {{ .Values.global.environment | default "unknown" }}
+
+🌐 Frontend Access:
+{{- if .Values.frontend.ingress.enabled }}
+{{- range .Values.frontend.ingress.hosts }}
+  - http{{ if $.Values.frontend.ingress.tls }}s{{ end }}://{{ .host }}{{ range .paths }}{{ .path }}{{ end }}
 {{- end }}
 
-To check the status of your deployment:
+To get the ingress IP:
+  kubectl get ingress {{ .Release.Name }}-frontend -n {{ .Release.Namespace }}
+{{- else }}
+  Frontend ingress is disabled. To access the frontend:
+  kubectl port-forward svc/{{ .Release.Name }}-frontend {{ .Values.frontend.service.port }}:{{ .Values.frontend.service.port }} -n {{ .Release.Namespace }}
+  Then visit: http://localhost:{{ .Values.frontend.service.port }}
+{{- end }}
+
+🗄️  MongoDB Access:
+{{- if .Values.mongodb.secretsManager.enabled }}
+  MongoDB credentials are managed by AWS Secrets Manager.
+  Secret name: {{ .Values.mongodb.secretsManager.secretName }}
+{{- else if .Values.mongodb.auth.enabled }}
+  MongoDB credentials:
+  - Username: {{ .Values.mongodb.auth.username }}
+  - Password: {{ .Values.mongodb.auth.password }}
+  - Database: {{ .Values.mongodb.auth.database | default "admin" }}
+{{- end }}
+
+To connect to MongoDB:
+  kubectl port-forward svc/{{ .Release.Name }}-mongodb 27017:27017 -n {{ .Release.Namespace }}
+
+📊 Resource Status:
+Check the status of your deployment:
   kubectl get pods -n {{ .Release.Namespace }}
   kubectl get services -n {{ .Release.Namespace }}
+  kubectl get ingress -n {{ .Release.Namespace }}
 
-{{- if .Values.mongodb.enabled }}
+🔍 Troubleshooting:
+View logs:
+  kubectl logs -f deployment/{{ .Release.Name }}-frontend -n {{ .Release.Namespace }}
+  kubectl logs -f statefulset/{{ .Release.Name }}-mongodb -n {{ .Release.Namespace }}
 
-MongoDB connection:
-  Internal: mongodb://{{ .Release.Name }}-mongodb:27017
+📚 Next Steps:
+{{- if eq .Values.global.environment "local" }}
+1. Add "127.0.0.1 {{ .Values.global.domain }}" to your /etc/hosts file
+2. Access the application at: http://{{ .Values.global.domain }}
+{{- else }}
+1. Configure your DNS to point to the load balancer
+2. Set up SSL certificates if needed
+3. Configure monitoring and logging
 {{- end }}
 
-{{- if index .Values "course-service" "enabled" }}
-
-Course Service:
-  Internal: http://{{ .Release.Name }}-course-service
-  Port forward: kubectl port-forward svc/{{ .Release.Name }}-course-service 8080:80 -n {{ .Release.Namespace }}
-{{- end }}
-
-{{- if index .Values "student-service" "enabled" }}
-
-Student Service:
-  Internal: http://{{ .Release.Name }}-student-service
-  Port forward: kubectl port-forward svc/{{ .Release.Name }}-student-service 8081:80 -n {{ .Release.Namespace }}
-  File uploads: Persistent volume mounted at /app/uploads
-{{- end }}
-
-{{- if index .Values "auth-service" "enabled" }}
-
-Auth Service:
-  Internal: http://{{ .Release.Name }}-auth-service
-  Port forward: kubectl port-forward svc/{{ .Release.Name }}-auth-service 8082:80 -n {{ .Release.Namespace }}
-  JWT Authentication: Enabled
-  Admin user: Created automatically on startup
-{{- end }}
-
-{{- if index .Values "frontend" "enabled" }}
-
-Frontend Service:
-  Internal: http://{{ .Release.Name }}-frontend
-  {{- $frontend := index .Values "frontend" }}
-  {{- if $frontend.ingress.enabled }}
-  External: http://{{ (index $frontend.ingress.hosts 0).host }}
-  Setup: Add "$(minikube ip) {{ (index $frontend.ingress.hosts 0).host }}" to /etc/hosts
-  {{- else }}
-  Port forward: kubectl port-forward svc/{{ .Release.Name }}-frontend 8083:80 -n {{ .Release.Namespace }}
-  {{- end }}
-{{- end }}
+Happy coding! 🎉

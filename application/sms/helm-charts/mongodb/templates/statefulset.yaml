@@ -16,7 +16,7 @@ spec:
       labels:
         {{- include "mongodb.selectorLabels" . | nindent 8 }}
     spec:
-      serviceAccountName: {{ include "mongodb.serviceAccountName" . }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       containers:
         - name: mongodb
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -26,6 +26,8 @@ spec:
               containerPort: 27017
               protocol: TCP
           env:
+            {{- if .Values.secretsManager.enabled }}
+            # AWS Secrets Manager configuration
             - name: MONGO_INITDB_ROOT_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -36,15 +38,36 @@ spec:
                 secretKeyRef:
                   name: {{ include "mongodb.fullname" . }}-credentials
                   key: password
+            {{- else if .Values.auth.enabled }}
+            # Local development configuration
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.fullname" . }}-auth
+                  key: username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.fullname" . }}-auth
+                  key: password
+            {{- if .Values.auth.database }}
+            - name: MONGO_INITDB_DATABASE
+              value: {{ .Values.auth.database | quote }}
+            {{- end }}
+            {{- end }}
             {{- if .Values.env }}
             {{- toYaml .Values.env | nindent 12 }}
             {{- end }}
           volumeMounts:
+            {{- if .Values.persistence.enabled }}
             - name: mongodb-data
               mountPath: /data/db
+            {{- end }}
+            {{- if .Values.secretsManager.enabled }}
             - name: secrets-store
               mountPath: /mnt/secrets-store
               readOnly: true
+            {{- end }}
             {{- if .Values.volumeMounts }}
             {{- toYaml .Values.volumeMounts | nindent 12 }}
             {{- end }}
@@ -64,26 +87,26 @@ spec:
           {{- end }}
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
-            exec:
-              command:
-                - mongo
-                - --eval
-                - "db.adminCommand('ping')"
+            tcpSocket:
+              port: 27017
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
             failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
           {{- end }}
       volumes:
+        {{- if .Values.secretsManager.enabled }}
         - name: secrets-store
           csi:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
               secretProviderClass: {{ include "mongodb.fullname" . }}-secrets
+        {{- end }}
         {{- if .Values.volumes }}
         {{- toYaml .Values.volumes | nindent 8 }}
         {{- end }}
+  {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
     - metadata:
         name: mongodb-data
@@ -98,3 +121,4 @@ spec:
         resources:
           requests:
             storage: {{ .Values.persistence.size }}
+  {{- end }}

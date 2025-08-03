@@ -1,0 +1,95 @@
+# Local Minikube Development Environment Overrides
+# Use with: helm install sms-app ./sms-app -f values-dev.yaml
+# Prerequisites:
+#   - minikube addons enable ingress
+#   - Add "127.0.0.1 sms-app.local" to /etc/hosts
+
+global:
+  environment: local
+  domain: sms-app.local
+
+frontend:
+  replicaCount: 1 # Single replica for local dev
+
+  image:
+    tag: "1.21"
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ingress:
+    enabled: true
+    ingressClassName: nginx # Modern approach for nginx ingress
+    annotations:
+      # Use nginx ingress controller (default in minikube)
+      nginx.ingress.kubernetes.io/rewrite-target: /
+      # Remove all AWS ALB specific annotations for minikube
+
+    hosts:
+      - host: sms-app.local # Local development domain
+        paths:
+          - path: /
+            pathType: Prefix
+
+    # No TLS for local development
+    tls: []
+
+  resources:
+    # Very low resources for local development
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+  autoscaling:
+    enabled: false # No autoscaling in local dev
+
+mongodb:
+  replicaCount: 1 # Single MongoDB instance for local dev
+
+  image:
+    tag: "6.0"
+    pullPolicy: IfNotPresent
+
+  serviceAccount:
+    create: true
+    # Remove AWS IAM role annotations for local development
+    annotations: {}
+
+  # Disable AWS Secrets Manager for local development
+  # Use regular Kubernetes secrets instead
+  secretsManager:
+    enabled: false
+
+  # Create a simple secret for local development
+  auth:
+    enabled: true
+    username: "admin"
+    password: "password123" # Simple password for local dev
+    database: "smsapp"
+
+  persistence:
+    enabled: true
+    size: 1Gi # Very small storage for local dev
+    accessModes:
+      - ReadWriteOnce
+    # Use default storage class (usually hostpath in minikube)
+
+  resources:
+    # Minimal resources for local development
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  # Disable health checks for faster startup in local dev
+  livenessProbe:
+    enabled: false
+  readinessProbe:
+    enabled: false

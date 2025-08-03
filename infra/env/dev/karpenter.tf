@@ -17,7 +17,7 @@ locals {
           }
         },
         {
-          id = module.alb_sg.security_group_id
+          id = module.internet_sg.security_group_id
 
         }
         # {

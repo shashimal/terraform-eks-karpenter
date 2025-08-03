@@ -98,7 +98,7 @@ resource "kubernetes_service_account" "secrets_store_csi_driver" {
 
 
 resource "aws_secretsmanager_secret" "example" {
-  name = "my-app-secret"
+  name = "my-app-secret2"
 }
 
 resource "aws_secretsmanager_secret_version" "example" {

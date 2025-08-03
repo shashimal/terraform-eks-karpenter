@@ -1,39 +1,89 @@
-replicaCount: 1
+# Default values for frontend.
+# This is a YAML-formatted file.
+
+replicaCount: 2
 
 image:
-  repository: shashimald/frontend-service
-  tag: "v1.0.0"
+  repository: nginx
   pullPolicy: IfNotPresent
+  tag: "1.21"
+
+nameOverride: ""
+fullnameOverride: ""
 
 service:
   type: ClusterIP
   port: 80
-  targetPort: 80
 
-# Environment variables for API endpoints
-env:
-  REACT_APP_STUDENT_API_URL: "http://sms-student-service/api/students"
-  REACT_APP_COURSE_API_URL: "http://sms-course-service/api/courses"
-  REACT_APP_AUTH_API_URL: "http://sms-auth-service/api/auth"
-
-# Ingress configuration for Minikube
 ingress:
   enabled: true
-  className: "nginx"
+
+  # Ingress class name (modern approach - replaces kubernetes.io/ingress.class annotation)
+  ingressClassName: alb
+
+  # All ingress annotations - AWS ALB specific and others
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # AWS Load Balancer Controller annotations
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+
+    # Health check configuration
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "15"
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "5"
+    alb.ingress.kubernetes.io/healthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: "2"
+
+    # SSL/TLS configuration (uncomment and configure as needed)
+    # alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:us-west-2:123456789012:certificate/12345678-1234-1234-1234-123456789012"
+    # alb.ingress.kubernetes.io/ssl-policy: "ELBSecurityPolicy-TLS-1-2-2017-01"
+    # alb.ingress.kubernetes.io/ssl-redirect: "443"
+
+    # Subnet configuration (uncomment and configure as needed)
+    # alb.ingress.kubernetes.io/subnets: "subnet-12345678,subnet-87654321"
+
+    # Security groups (uncomment and configure as needed)
+    # alb.ingress.kubernetes.io/security-groups: "sg-12345678"
+
+    # WAF configuration (uncomment and configure as needed)
+    # alb.ingress.kubernetes.io/wafv2-acl-arn: "arn:aws:wafv2:us-west-2:123456789012:regional/webacl/ExampleWebACL/473e64fd-f30b-4765-81a0-62ad96dd167a"
+
+    # Additional tags for the load balancer
+    alb.ingress.kubernetes.io/tags: "Environment=dev,Project=sms-app"
+
+    # Load balancer attributes
+    alb.ingress.kubernetes.io/load-balancer-attributes: "idle_timeout.timeout_seconds=60,routing.http2.enabled=true,access_logs.s3.enabled=false"
+
+    # Additional annotations (cert-manager, etc.)
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+
   hosts:
-    - host: sms-app.local
+    - host: frontend.example.com
       paths:
         - path: /
           pathType: Prefix
+          # servicePort: 80  # Optional: override default service port
+    # - host: api.example.com
+    #   paths:
+    #     - path: /api
+    #       pathType: Prefix
+
+  # TLS configuration (optional - use with cert-manager or pre-existing secrets)
   tls: []
+  #  - secretName: frontend-tls
+  #    hosts:
+  #      - frontend.example.com
 
 resources:
   limits:
-    cpu: 200m
-    memory: 256Mi
+    cpu: 500m
+    memory: 512Mi
   requests:
-    cpu: 100m
-    memory: 128Mi
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
