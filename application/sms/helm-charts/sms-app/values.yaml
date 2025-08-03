@@ -67,9 +67,9 @@ frontend:
       memory: 512Mi
   service:
     type: ClusterIP
-    clusterIP: None # Headless service for StatefulSet
-    port: 27017
-    annotations: {}
+    port: 80
+    targetPort: 80
+
   autoscaling:
     enabled: true
     minReplicas: 3
