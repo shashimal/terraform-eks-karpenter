@@ -141,7 +141,7 @@ auth-service:
     - name: NODE_ENV
       value: "development"
     - name: MONGODB_URI
-      value: "mongodb://admin:password123@sms-mongodb:27017/smsapp"
+      value: "mongodb://admin:password123@sms-mongodb:27017/smsapp?authSource=admin"
     - name: JWT_SECRET
       value: "dev-jwt-secret-key-not-for-production"
 
@@ -187,7 +187,7 @@ course-service:
   env:
     PORT: "8081"
     NODE_ENV: "development"
-    MONGODB_URI: "mongodb://admin:password123@sms-mongodb:27017/smsapp"
+    MONGODB_URI: "mongodb://admin:password123@sms-mongodb:27017/smsapp?authSource=admin"
 
   ingress:
     enabled: false
@@ -226,7 +226,7 @@ student-service:
   env:
     PORT: "8082"
     NODE_ENV: "development"
-    MONGODB_URI: "mongodb://admin:password123@sms-mongodb:27017/smsapp"
+    MONGODB_URI: "mongodb://admin:password123@sms-mongodb:27017/smsapp?authSource=admin"
 
   ingress:
     enabled: false
