@@ -16,7 +16,7 @@ frontend:
 
   image:
     repository: shashimald/frontend-service
-    tag: "v1.0.2"
+    tag: "v1.0.4"
     pullPolicy: IfNotPresent
 
   service:
@@ -29,8 +29,7 @@ frontend:
     ingressClassName: nginx # Modern approach for nginx ingress
     annotations:
       # Use nginx ingress controller (default in minikube)
-      #nginx.ingress.kubernetes.io/rewrite-target: /
-      nginx.ingress.kubernetes.io/rewrite-target: /$1
+      nginx.ingress.kubernetes.io/rewrite-target: /
     hosts:
       - host: sms-app.local # Local development domain
         paths:
