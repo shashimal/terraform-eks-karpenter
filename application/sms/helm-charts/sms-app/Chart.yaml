@@ -12,3 +12,12 @@ dependencies:
   - name: mongodb
     version: "0.1.0"
     repository: "file://../mongodb"
+  - name: auth-service
+    version: "0.1.0"
+    repository: "file://../auth-service"
+  - name: course-service
+    version: "0.1.0"
+    repository: "file://../course-service"
+  - name: student-service
+    version: "0.1.0"
+    repository: "file://../student-service"

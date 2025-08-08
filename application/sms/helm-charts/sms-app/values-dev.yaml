@@ -8,12 +8,15 @@ global:
   environment: local
   domain: sms-app.local
 
+##############################################################################
+# Frontend Service Configuration for Local Development
+##############################################################################
 frontend:
-  replicaCount: 1 # Single replica for local dev
+  replicaCount: 1
 
   image:
     repository: shashimald/frontend-service
-    tag: "v1.0.0"
+    tag: "v1.0.2"
     pullPolicy: IfNotPresent
 
   service:
@@ -26,20 +29,20 @@ frontend:
     ingressClassName: nginx # Modern approach for nginx ingress
     annotations:
       # Use nginx ingress controller (default in minikube)
-      nginx.ingress.kubernetes.io/rewrite-target: /
-      # Remove all AWS ALB specific annotations for minikube
-
+      #nginx.ingress.kubernetes.io/rewrite-target: /
+      nginx.ingress.kubernetes.io/rewrite-target: /$1
     hosts:
       - host: sms-app.local # Local development domain
         paths:
           - path: /
             pathType: Prefix
-
-    # No TLS for local development
     tls: []
-
+  env:
+    REACT_APP_STUDENT_API_URL: "http://student-service:8082/api/students"
+    REACT_APP_COURSE_API_URL: "http://course-service:8081//api/courses"
+    REACT_APP_AUTH_API_URL: "http://auth-service:8080/api/auth"
+    REACT_APP_USER_API_URL: "http://auth-service:8080/api/users"
   resources:
-    # Very low resources for local development
     limits:
       cpu: 100m
       memory: 128Mi
@@ -48,7 +51,11 @@ frontend:
       memory: 64Mi
 
   autoscaling:
-    enabled: false # No autoscaling in local dev
+    enabled: false
+
+##############################################################################
+# Mongodb Service Configuration for Local Development
+##############################################################################
 
 mongodb:
   replicaCount: 1 # Single MongoDB instance for local dev
@@ -97,21 +104,27 @@ mongodb:
   readinessProbe:
     enabled: false
 
+##############################################################################
 # Auth Service Configuration for Local Development
+##############################################################################
 auth-service:
-  replicaCount: 1 # Single replica for local dev
-
+  replicaCount: 1
+  name: ""
   image:
     repository: shashimald/auth-service
     tag: "v1.0.0"
     pullPolicy: IfNotPresent
 
+  serviceAccount:
+    create: false
+    automount: true
+    annotations: {}
+
   service:
     type: ClusterIP
-    port: 8080
+    port: 80
 
   resources:
-    # Minimal resources for local development
     limits:
       cpu: 200m
       memory: 256Mi
@@ -120,7 +133,7 @@ auth-service:
       memory: 128Mi
 
   autoscaling:
-    enabled: false # No autoscaling in local dev
+    enabled: false
 
   env:
     - name: PORT
@@ -128,13 +141,19 @@ auth-service:
     - name: NODE_ENV
       value: "development"
     - name: MONGODB_URI
-      value: "mongodb://admin:password123@mongodb:27017/smsapp"
+      value: "mongodb://admin:password123@sms-mongodb:27017/smsapp"
+    - name: JWT_SECRET
+      value: "dev-jwt-secret-key-not-for-production"
 
-  # Disable health checks for faster startup in local dev
+  ingress:
+    enabled: false
+
   livenessProbe:
     enabled: false
   readinessProbe:
     enabled: false
+
+##############################################################################
 
 # Course Service Configuration for Local Development
 course-service:
@@ -147,7 +166,7 @@ course-service:
 
   service:
     type: ClusterIP
-    port: 8081
+    port: 80
 
   resources:
     # Minimal resources for local development
@@ -161,13 +180,17 @@ course-service:
   autoscaling:
     enabled: false # No autoscaling in local dev
 
+  mongodb:
+    host: "sms-mongodb"
+    port: 27017
+
   env:
-    - name: PORT
-      value: "8081"
-    - name: NODE_ENV
-      value: "development"
-    - name: MONGODB_URI
-      value: "mongodb://admin:password123@mongodb:27017/smsapp"
+    PORT: "8081"
+    NODE_ENV: "development"
+    MONGODB_URI: "mongodb://admin:password123@sms-mongodb:27017/smsapp"
+
+  ingress:
+    enabled: false
 
   # Disable health checks for faster startup in local dev
   livenessProbe:
@@ -186,7 +209,7 @@ student-service:
 
   service:
     type: ClusterIP
-    port: 8082
+    port: 80
 
   resources:
     # Minimal resources for local development
@@ -201,12 +224,23 @@ student-service:
     enabled: false # No autoscaling in local dev
 
   env:
-    - name: PORT
-      value: "8082"
-    - name: NODE_ENV
-      value: "development"
-    - name: MONGODB_URI
-      value: "mongodb://admin:password123@mongodb:27017/smsapp"
+    PORT: "8082"
+    NODE_ENV: "development"
+    MONGODB_URI: "mongodb://admin:password123@sms-mongodb:27017/smsapp"
+
+  ingress:
+    enabled: false
+
+  mongodb:
+    host: "sms-mongodb"
+    port: 27017
+
+  persistence:
+    enabled: true
+    size: 1Gi
+    accessMode: ReadWriteOnce
+    storageClass: "standard"
+    mountPath: "/app/uploads"
 
   # Disable health checks for faster startup in local dev
   livenessProbe:
