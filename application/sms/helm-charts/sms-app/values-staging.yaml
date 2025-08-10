@@ -1,0 +1,121 @@
+# EKS Staging Environment Configuration
+# Use with: helm install sms-app ./sms-app -f values-staging.yaml
+
+global:
+  environment: staging
+  domain: staging-sms.yourdomain.com
+
+# Main ingress configuration for EKS staging with ALB
+ingress:
+  enabled: true
+  className: "alb"
+  annotations:
+    # AWS Load Balancer Controller annotations for staging
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/load-balancer-name: sms-app-staging-alb
+
+    # SSL/TLS Configuration
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-west-2:123456789012:certificate/your-staging-cert-arn
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+
+    # Basic health checks for staging
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
+
+    # Staging-specific security groups and subnets
+    alb.ingress.kubernetes.io/security-groups: sg-staging-xxxxxxxxx
+    alb.ingress.kubernetes.io/subnets: subnet-staging-xxxxxxxx,subnet-staging-yyyyyyyy
+
+  hosts:
+    - host: staging-sms.yourdomain.com
+      paths:
+        - path: /api/auth
+          pathType: Prefix
+          serviceName: sms-auth-service
+          servicePort: 80
+        - path: /api/users
+          pathType: Prefix
+          serviceName: sms-auth-service
+          servicePort: 80
+        - path: /api/courses
+          pathType: Prefix
+          serviceName: sms-course-service
+          servicePort: 80
+        - path: /api/students
+          pathType: Prefix
+          serviceName: sms-student-service
+          servicePort: 80
+        - path: /
+          pathType: Prefix
+          serviceName: sms-frontend
+          servicePort: 80
+
+  tls:
+    - secretName: sms-app-staging-tls
+      hosts:
+        - staging-sms.yourdomain.com
+
+# Reduced resources for staging
+frontend:
+  replicaCount: 2
+  image:
+    repository: your-ecr-repo/sms-frontend
+    tag: "staging"
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+
+auth-service:
+  replicaCount: 1
+  image:
+    repository: your-ecr-repo/sms-auth-service
+    tag: "staging"
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  autoscaling:
+    enabled: false
+
+course-service:
+  replicaCount: 1
+  image:
+    repository: your-ecr-repo/sms-course-service
+    tag: "staging"
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  autoscaling:
+    enabled: false
+
+student-service:
+  replicaCount: 1
+  image:
+    repository: your-ecr-repo/sms-student-service
+    tag: "staging"
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  autoscaling:
+    enabled: false
