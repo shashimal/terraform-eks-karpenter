@@ -1,0 +1,53 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "sms-app.fullname" . }}-ingress
+  labels:
+    {{- include "sms-app.labels" . | nindent 4 }}
+  annotations: {}
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths:
+      # Auth service API
+      - path: /api/auth
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}-auth-service
+            port:
+              number: 80
+      # User management API (also handled by auth service)
+      - path: /api/users
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}-auth-service
+            port:
+              number: 80
+      # Course service API
+      - path: /api/courses
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}-course-service
+            port:
+              number: 80
+      # Student service API
+      - path: /api/students
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}-student-service
+            port:
+              number: 80
+      # Frontend - serve static files and handle React routing (catch-all)
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}-frontend
+            port:
+              number: 80

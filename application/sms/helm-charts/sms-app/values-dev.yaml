@@ -8,6 +8,10 @@ global:
   environment: local
   domain: sms-app.local
 
+# Main ingress configuration for path-based routing
+ingress:
+  host: sms-app.local
+
 ##############################################################################
 # Frontend Service Configuration for Local Development
 ##############################################################################
@@ -15,9 +19,9 @@ frontend:
   replicaCount: 1
 
   image:
-    repository: shashimald/frontend-service
-    tag: "v1.0.4"
-    pullPolicy: IfNotPresent
+    repository: sms-frontend
+    tag: "latest"
+    pullPolicy: Never
 
   service:
     type: ClusterIP
@@ -25,22 +29,12 @@ frontend:
     targetPort: 80
 
   ingress:
-    enabled: true
-    ingressClassName: nginx # Modern approach for nginx ingress
-    annotations:
-      # Use nginx ingress controller (default in minikube)
-      nginx.ingress.kubernetes.io/rewrite-target: /
-    hosts:
-      - host: sms-app.local # Local development domain
-        paths:
-          - path: /
-            pathType: Prefix
-    tls: []
+    enabled: false
   env:
-    REACT_APP_STUDENT_API_URL: "http://student-service:8082/api/students"
-    REACT_APP_COURSE_API_URL: "http://course-service:8081//api/courses"
-    REACT_APP_AUTH_API_URL: "http://auth-service:8080/api/auth"
-    REACT_APP_USER_API_URL: "http://auth-service:8080/api/users"
+    REACT_APP_STUDENT_API_URL: "/api/students"
+    REACT_APP_COURSE_API_URL: "/api/courses"
+    REACT_APP_AUTH_API_URL: "/api/auth"
+    REACT_APP_USER_API_URL: "/api/users"
   resources:
     limits:
       cpu: 100m
