@@ -59,52 +59,15 @@ resource "kubernetes_service_account" "secrets_store_csi_driver" {
   depends_on = [helm_release.secrets_store_csi_driver]
 }
 
-# # Example SecretProviderClass for AWS Secrets Manager
-# resource "kubernetes_manifest" "secret_provider_class" {
-#   manifest = {
-#     apiVersion = "secrets-store.csi.x-k8s.io/v1"
-#     kind       = "SecretProviderClass"
-#     metadata = {
-#       name      = "aws-secrets"
-#       namespace = "default"
-#     }
-#     spec = {
-#       provider = "aws"
-#       parameters = {
-#         objects = yamlencode([
-#           {
-#             objectName = "your-secret-name"
-#             objectType = "secretsmanager"
-#           }
-#         ])
-#       }
-#       secretObjects = [
-#         {
-#           secretName = "your-k8s-secret"
-#           type       = "Opaque"
-#           data = [
-#             {
-#               objectName = "your-secret-name"
-#               key        = "secret-key"
-#             }
-#           ]
-#         }
-#       ]
-#     }
-#   }
 
-#   depends_on = [helm_release.aws_secrets_manager_csi_provider]
+# resource "aws_secretsmanager_secret" "example" {
+#   name = "my-app-secret2"
 # }
-
-
-resource "aws_secretsmanager_secret" "example" {
-  name = "my-app-secret2"
-}
-
-resource "aws_secretsmanager_secret_version" "example" {
-  secret_id = aws_secretsmanager_secret.example.id
-  secret_string = jsonencode({
-    username = "admin"
-    password = "s3cr3t"
-  })
-}
+#
+# resource "aws_secretsmanager_secret_version" "example" {
+#   secret_id = aws_secretsmanager_secret.example.id
+#   secret_string = jsonencode({
+#     username = "admin"
+#     password = "s3cr3t"
+#   })
+# }
