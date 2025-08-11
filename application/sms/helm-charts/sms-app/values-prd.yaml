@@ -139,15 +139,17 @@ mongodb:
     create: true
     annotations: {}
 
-  # Use Kubernetes secrets for production
+  # Use centralized AWS Secrets Manager for production
   secretsManager:
-    enabled: false
+    enabled: true
+    # This will be managed by the centralized SecretProviderClass in sms-app
+    secretName: "sms-app/mongodb-credentials"
 
   # Production MongoDB authentication
   auth:
     enabled: true
-    username: "admin"
-    password: "CHANGE_THIS_IN_PRODUCTION" # Use strong password
+    # Use centralized secret name from parent chart
+    centralizedSecretName: "sms-app-mongodb-credentials"
     database: "smsapp"
 
   persistence:

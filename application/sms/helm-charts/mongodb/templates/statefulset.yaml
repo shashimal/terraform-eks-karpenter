@@ -27,16 +27,16 @@ spec:
               protocol: TCP
           env:
             {{- if .Values.secretsManager.enabled }}
-            # AWS Secrets Manager configuration
+            # AWS Secrets Manager configuration - using centralized secret from parent chart
             - name: MONGO_INITDB_ROOT_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "mongodb.fullname" . }}-credentials
+                  name: {{ .Values.auth.centralizedSecretName | default (printf "%s-credentials" (include "mongodb.fullname" .)) }}
                   key: username
             - name: MONGO_INITDB_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "mongodb.fullname" . }}-credentials
+                  name: {{ .Values.auth.centralizedSecretName | default (printf "%s-credentials" (include "mongodb.fullname" .)) }}
                   key: password
             {{- else if .Values.auth.enabled }}
             # Local development configuration - using centralized dev secret
