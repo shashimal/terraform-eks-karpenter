@@ -50,6 +50,9 @@ auth:
   username: "admin"
   password: "password123"
   database: "admin"
+  # Name of the centralized secret containing MongoDB credentials
+  # If not specified, defaults to "<release-name>-secret"
+  centralizedSecretName: ""
 
 # Persistence configuration
 persistence:

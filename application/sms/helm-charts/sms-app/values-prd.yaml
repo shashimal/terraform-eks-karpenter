@@ -1,190 +1,258 @@
-# SMS Application - Umbrella Chart Values
-# These values override the individual chart defaults
+# EKS Production Environment Configuration
+# Use with: helm install sms-app ./sms-app -f values-prd.yaml
+# Prerequisites:
+#   - AWS Load Balancer Controller installed in EKS cluster
+#   - Route53 hosted zone configured
+#   - ACM certificate created
 
-# Global values shared across all subcharts
 global:
   environment: production
-  region: ap-southeast-1
   domain: sms.duleendra.com
 
-# Frontend subchart overrides
+# AWS Secrets Manager Configuration for Production
+secretsManager:
+  enabled: true
+  mongodbSecretName: "sms-app/mongodb-credentials"
+  jwtSecretName: "sms-app/jwt-secret"
+  serviceAccount:
+    roleArn: "arn:aws:iam::YOUR_ACCOUNT_ID:role/sms-app-secrets-manager-role"
+
+# Main ingress configuration for EKS with ALB
+ingress:
+  enabled: true
+  className: "alb"
+  annotations:
+    # AWS Load Balancer Controller annotations
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/load-balancer-name: sms-app-alb
+
+    # SSL/TLS Configuration
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-west-2:123456789012:certificate/your-cert-arn
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+
+    # Health checks
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "5"
+    alb.ingress.kubernetes.io/healthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: "3"
+
+    # Security
+    alb.ingress.kubernetes.io/security-groups: sg-xxxxxxxxx
+    alb.ingress.kubernetes.io/subnets: subnet-xxxxxxxx,subnet-yyyyyyyy
+
+    # Performance
+    alb.ingress.kubernetes.io/load-balancer-attributes: |
+      idle_timeout.timeout_seconds=60,
+      routing.http2.enabled=true,
+      access_logs.s3.enabled=true,
+      access_logs.s3.bucket=your-alb-logs-bucket,
+      access_logs.s3.prefix=sms-app
+
+    # WAF (optional)
+    # alb.ingress.kubernetes.io/wafv2-acl-arn: arn:aws:wafv2:us-west-2:123456789012:regional/webacl/your-waf-acl/xxxxx
+
+  hosts:
+    - host: sms.duleendra.com
+      paths:
+        # API paths with higher priority (more specific paths first)
+        - path: /api/auth
+          pathType: Prefix
+          serviceName: sms-auth-service
+          servicePort: 80
+        - path: /api/users
+          pathType: Prefix
+          serviceName: sms-auth-service
+          servicePort: 80
+        - path: /api/courses
+          pathType: Prefix
+          serviceName: sms-course-service
+          servicePort: 80
+        - path: /api/students
+          pathType: Prefix
+          serviceName: sms-student-service
+          servicePort: 80
+        # Frontend catch-all (must be last)
+        - path: /
+          pathType: Prefix
+          serviceName: sms-frontend
+          servicePort: 80
+
+  tls:
+    - secretName: sms-app-tls
+      hosts:
+        - sms.duleendra.com
+
+##############################################################################
+# Frontend Service Configuration for EKS Production
+##############################################################################
 frontend:
-  replicaCount: 3 # Override default of 2
+  replicaCount: 3 # Multiple replicas for HA
 
   image:
-    tag: "1.23" # Override default nginx version
+    repository: sms-frontend
+    tag: "latest"
+    pullPolicy: IfNotPresent
 
-  ingress:
-    enabled: true
-    ingressClassName: alb # Modern approach - replaces kubernetes.io/ingress.class annotation
-    annotations:
-      # Production ALB settings (override defaults)
-      alb.ingress.kubernetes.io/scheme: internet-facing
-      alb.ingress.kubernetes.io/target-type: ip
-      alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}, {"HTTP":80}]'
-
-      # Production health checks (more aggressive)
-      alb.ingress.kubernetes.io/healthcheck-path: /
-      alb.ingress.kubernetes.io/healthcheck-interval-seconds: "10"
-      alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "3"
-      alb.ingress.kubernetes.io/healthy-threshold-count: "2"
-      alb.ingress.kubernetes.io/unhealthy-threshold-count: "3"
-
-      # Production SSL/TLS
-      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-southeast-1:793209430381:certificate/b696306d-dc58-4830-b9df-da54153b31c4"
-      alb.ingress.kubernetes.io/ssl-policy: "ELBSecurityPolicy-TLS-1-2-2017-01"
-      alb.ingress.kubernetes.io/ssl-redirect: "443"
-
-      # Production subnets and security
-      alb.ingress.kubernetes.io/subnets: "subnet-012260aacd52b825a,subnet-07616087a28b9fcc4"
-      alb.ingress.kubernetes.io/security-groups: "sg-00bb983fb11ec3c00"
-
-      # Production tags
-      alb.ingress.kubernetes.io/tags: "Environment=production,Project=sms-app,Team=platform"
-
-      # Production load balancer attributes
-      alb.ingress.kubernetes.io/load-balancer-attributes: "idle_timeout.timeout_seconds=300,routing.http2.enabled=true"
-
-    hosts:
-      - host: sms.duleendra.com # Production domain
-        paths:
-          - path: /
-            pathType: Prefix
-
-    tls: []
-  #      - secretName: sms-app-tls
-  #        hosts:
-  #          - sms.duleendra.com
-
-  resources:
-    # Production resource limits (higher than defaults)
-    limits:
-      cpu: 1000m
-      memory: 1Gi
-    requests:
-      cpu: 500m
-      memory: 512Mi
   service:
     type: ClusterIP
     port: 80
     targetPort: 80
 
+  ingress:
+    enabled: false # Using main ingress
+
+  env:
+    REACT_APP_STUDENT_API_URL: "/api/students"
+    REACT_APP_COURSE_API_URL: "/api/courses"
+    REACT_APP_AUTH_API_URL: "/api/auth"
+    REACT_APP_USER_API_URL: "/api/users"
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
   autoscaling:
     enabled: true
     minReplicas: 3
-    maxReplicas: 20
+    maxReplicas: 10
     targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
 
-# MongoDB subchart overrides
+##############################################################################
+# MongoDB Configuration for EKS Production
+##############################################################################
 mongodb:
-  replicaCount: 3 # Production replica set
-  host: "sms-mongodb"
-  port: 27017
+  replicaCount: 1 # Single MongoDB instance for production (consider 3 for HA)
+
+  image:
+    tag: "6.0"
+    pullPolicy: IfNotPresent
+
   serviceAccount:
-    name: "secrets-store-csi-driver"
-    annotations:
-      # Production IAM role
-      eks.amazonaws.com/role-arn: "arn:aws:iam::793209430381:role/secrets-store-csi-driver-role"
-
-  secretsManager:
-    secretName: "my-app-secret2" # Production secret
-
-  service:
-    type: ClusterIP
-    clusterIP: None # Headless service for StatefulSet
-    port: 27017
+    create: true
     annotations: {}
 
+  # Use Kubernetes secrets for production
+  secretsManager:
+    enabled: false
+
+  # Production MongoDB authentication
+  auth:
+    enabled: true
+    username: "admin"
+    password: "CHANGE_THIS_IN_PRODUCTION" # Use strong password
+    database: "smsapp"
+
   persistence:
-    size: 100Gi # Larger storage for production
-    storageClass: "gp2"
+    enabled: true
+    size: 20Gi # Larger storage for production
+    accessModes:
+      - ReadWriteOnce
+    # Use EBS gp3 storage class for better performance
+    storageClass: "gp3"
 
   resources:
-    # Production MongoDB resources
+    # Production-appropriate resources
     limits:
-      cpu: 2000m
-      memory: 4Gi
-    requests:
       cpu: 1000m
       memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
 
-# Auth Service Configuration for pro Development
+  # Enable health checks for production
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
 
+##############################################################################
+# Auth Service Configuration for EKS Production
+##############################################################################
 auth-service:
-  replicaCount: 1
+  enabled: true
+  replicaCount: 2
 
   image:
     repository: shashimald/auth-service
     tag: "v1.0.0"
     pullPolicy: IfNotPresent
 
+  serviceAccount:
+    create: false
+    automount: true
+    annotations: {}
+
   service:
     type: ClusterIP
-    port: 8080
+    port: 80
 
   resources:
     limits:
-      cpu: 200m
-      memory: 256Mi
+      cpu: 500m
+      memory: 512Mi
     requests:
-      cpu: 100m
-      memory: 128Mi
+      cpu: 250m
+      memory: 256Mi
 
   autoscaling:
-    enabled: false
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+
+  # Environment variables now managed via ConfigMap and Secret
+  jwtSecret: "CHANGE_THIS_STRONG_JWT_SECRET_IN_PRODUCTION"
 
   env:
-    - name: PORT
-      value: "8080"
-    - name: NODE_ENV
-      value: "development"
-    - name: MONGODB_URI
-      value: "mongodb://admin:password123@mongodb:27017/smsapp"
+    PORT: "8080"
+
+  ingress:
+    enabled: false
 
   livenessProbe:
-    enabled: false
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
   readinessProbe:
-    enabled: false
-# Auth Service subchart overrides
-auth-service:
-  replicaCount: 2 # Production replicas
-
-  image:
-    repository: auth-service
-    tag: "latest"
-
-  resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
-    requests:
-      cpu: 250m
-      memory: 256Mi
-
-  env:
-    - name: PORT
-      value: "8080"
-    - name: NODE_ENV
-      value: "production"
-    - name: JWT_SECRET
-      value: "production-jwt-secret-change-this-in-real-deployment"
-    - name: MONGODB_URI
-      value: "mongodb://admin:password@mongodb:27017/smsapp"
-
-  autoscaling:
     enabled: true
-    minReplicas: 2
-    maxReplicas: 10
-    targetCPUUtilizationPercentage: 80
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
 
-# Course Service subchart overrides
+##############################################################################
+# Course Service Configuration for EKS Production
+##############################################################################
 course-service:
-  replicaCount: 2 # Production replicas
+  enabled: true
+  replicaCount: 2
 
   image:
-    repository: course-service
-    tag: "latest"
+    repository: shashimald/course-service
+    tag: "v1.0.2"
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 80
 
   resources:
     limits:
@@ -194,27 +262,50 @@ course-service:
       cpu: 250m
       memory: 256Mi
 
-  env:
-    - name: PORT
-      value: "8081"
-    - name: NODE_ENV
-      value: "production"
-    - name: MONGODB_URI
-      value: "mongodb://admin:password@mongodb:27017/smsapp"
-
   autoscaling:
     enabled: true
     minReplicas: 2
-    maxReplicas: 10
-    targetCPUUtilizationPercentage: 80
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
 
-# Student Service subchart overrides
+  mongodb:
+    host: "sms-mongodb"
+    port: 27017
+
+  env:
+    PORT: "8081"
+
+  ingress:
+    enabled: false
+
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+##############################################################################
+# Student Service Configuration for EKS Production
+##############################################################################
 student-service:
-  replicaCount: 2 # Production replicas
+  enabled: true
+  replicaCount: 2
 
   image:
-    repository: student-service
-    tag: "latest"
+    repository: shashimald/student-service
+    tag: "v1.0.0"
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 80
 
   resources:
     limits:
@@ -224,16 +315,38 @@ student-service:
       cpu: 250m
       memory: 256Mi
 
-  env:
-    - name: PORT
-      value: "8082"
-    - name: NODE_ENV
-      value: "production"
-    - name: MONGODB_URI
-      value: "mongodb://admin:password@mongodb:27017/smsapp"
-
   autoscaling:
     enabled: true
     minReplicas: 2
-    maxReplicas: 10
-    targetCPUUtilizationPercentage: 80
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+
+  env:
+    PORT: "8082"
+
+  ingress:
+    enabled: false
+
+  mongodb:
+    host: "sms-mongodb"
+    port: 27017
+
+  persistence:
+    enabled: true
+    size: 10Gi
+    accessMode: ReadWriteOnce
+    storageClass: "gp3" # EKS optimized storage class
+    mountPath: "/app/uploads"
+
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3

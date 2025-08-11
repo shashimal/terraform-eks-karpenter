@@ -15,6 +15,9 @@ spec:
       labels:
         {{- include "course-service.selectorLabels" . | nindent 8 }}
     spec:
+      {{- if and (eq .Values.global.environment "production") .Values.secretsManager.enabled }}
+      serviceAccountName: {{ .Release.Name }}-secrets-sa
+      {{- end }}
       initContainers:
         - name: wait-for-mongodb
           image: busybox:1.35
@@ -51,6 +54,12 @@ spec:
                 secretKeyRef:
                   name: {{ .Release.Name }}-secret
                   key: MONGODB_URI
+          {{- if and (eq .Values.global.environment "production") .Values.secretsManager.enabled }}
+          volumeMounts:
+            - name: secrets-store
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+          {{- end }}
           livenessProbe:
             httpGet:
               path: /health
@@ -77,4 +86,13 @@ spec:
             failureThreshold: 30
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      {{- if and (eq .Values.global.environment "production") .Values.secretsManager.enabled }}
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ .Release.Name }}-secrets
+      {{- end }}
 {{- end }}

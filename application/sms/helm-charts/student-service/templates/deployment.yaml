@@ -15,6 +15,9 @@ spec:
       labels:
         {{- include "student-service.selectorLabels" . | nindent 8 }}
     spec:
+      {{- if and (eq .Values.global.environment "production") .Values.secretsManager.enabled }}
+      serviceAccountName: {{ .Release.Name }}-secrets-sa
+      {{- end }}
       initContainers:
         - name: wait-for-mongodb
           image: busybox:1.35
@@ -51,6 +54,12 @@ spec:
                 secretKeyRef:
                   name: {{ .Release.Name }}-secret
                   key: MONGODB_URI
+          {{- if and (eq .Values.global.environment "production") .Values.secretsManager.enabled }}
+          volumeMounts:
+            - name: secrets-store
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+          {{- end }}
           {{- if .Values.persistence.enabled }}
           volumeMounts:
             - name: uploads
@@ -82,10 +91,18 @@ spec:
             failureThreshold: 30
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      {{- if .Values.persistence.enabled }}
       volumes:
+        {{- if .Values.persistence.enabled }}
         - name: uploads
           persistentVolumeClaim:
             claimName: {{ include "student-service.fullname" . }}-uploads
-      {{- end }}
+        {{- end }}
+        {{- if and (eq .Values.global.environment "production") .Values.secretsManager.enabled }}
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ .Release.Name }}-secrets
+        {{- end }}
 {{- end }}

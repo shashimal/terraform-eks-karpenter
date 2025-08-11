@@ -39,16 +39,16 @@ spec:
                   name: {{ include "mongodb.fullname" . }}-credentials
                   key: password
             {{- else if .Values.auth.enabled }}
-            # Local development configuration
+            # Local development configuration - using centralized dev secret
             - name: MONGO_INITDB_ROOT_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "mongodb.fullname" . }}-auth
+                  name: {{ .Values.auth.centralizedSecretName | default (printf "%s-secret" (include "sms-app.fullname" .)) }}
                   key: username
             - name: MONGO_INITDB_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "mongodb.fullname" . }}-auth
+                  name: {{ .Values.auth.centralizedSecretName | default (printf "%s-secret" (include "sms-app.fullname" .)) }}
                   key: password
             {{- if .Values.auth.database }}
             - name: MONGO_INITDB_DATABASE

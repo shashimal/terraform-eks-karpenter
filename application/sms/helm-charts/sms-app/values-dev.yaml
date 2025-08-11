@@ -8,6 +8,10 @@ global:
   environment: development
   domain: sms-app.local
 
+# AWS Secrets Manager Configuration (disabled for development)
+secretsManager:
+  enabled: false
+
 # Main ingress configuration for path-based routing
 ingress:
   enabled: true

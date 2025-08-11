@@ -17,7 +17,11 @@ spec:
       labels:
         {{- include "auth-service.selectorLabels" . | nindent 8 }}
     spec:
+      {{- if and (eq .Values.global.environment "production") .Values.secretsManager.enabled }}
+      serviceAccountName: {{ .Release.Name }}-secrets-sa
+      {{- else }}
       serviceAccountName: {{ include "auth-service.serviceAccountName" . }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -47,6 +51,12 @@ spec:
                 secretKeyRef:
                   name: {{ .Release.Name }}-secret
                   key: JWT_SECRET
+          {{- if and (eq .Values.global.environment "production") .Values.secretsManager.enabled }}
+          volumeMounts:
+            - name: secrets-store
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+          {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
             {{- toYaml .Values.livenessProbe.httpGet | nindent 12 }}
@@ -61,4 +71,13 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      {{- if and (eq .Values.global.environment "production") .Values.secretsManager.enabled }}
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ .Release.Name }}-secrets
+      {{- end }}
 {{- end }}
