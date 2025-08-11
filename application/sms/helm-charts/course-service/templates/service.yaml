@@ -1,3 +1,4 @@
+{{- if .Values.enabled | default true }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -12,4 +13,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "course-service.selectorLabels" . | nindent 4 }}
+    {{- include "course-service.selectorLabels" . | nindent 4 }}{{-
+ end }}

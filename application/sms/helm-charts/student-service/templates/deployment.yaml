@@ -1,3 +1,4 @@
+{{- if .Values.enabled | default true }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -35,10 +36,21 @@ spec:
               containerPort: 8082
               protocol: TCP
           env:
-            {{- range $key, $value := .Values.env }}
-            - name: {{ $key }}
-              value: {{ $value | quote }}
-            {{- end }}
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-config
+                  key: STUDENT_SERVICE_PORT
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-config
+                  key: NODE_ENV
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-secret
+                  key: MONGODB_URI
           {{- if .Values.persistence.enabled }}
           volumeMounts:
             - name: uploads
@@ -76,3 +88,4 @@ spec:
           persistentVolumeClaim:
             claimName: {{ include "student-service.fullname" . }}-uploads
       {{- end }}
+{{- end }}

@@ -1,0 +1,18 @@
+dependencies:
+- name: frontend
+  repository: file://../frontend
+  version: 0.1.0
+- name: mongodb
+  repository: file://../mongodb
+  version: 0.1.0
+- name: auth-service
+  repository: file://../auth-service
+  version: 0.1.0
+- name: course-service
+  repository: file://../course-service
+  version: 0.1.0
+- name: student-service
+  repository: file://../student-service
+  version: 0.1.0
+digest: sha256:24577eeb0ca67a70dddc2f1294aeb7d42f6daa22244ab10e49d1803533ea22a1
+generated: "2025-08-04T07:24:57.267969+08:00"

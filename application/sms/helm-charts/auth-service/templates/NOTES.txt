@@ -8,10 +8,8 @@
   kubectl get pods -l "app.kubernetes.io/name={{ include "auth-service.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -n {{ .Release.Namespace }}
 
 3. Auth service includes JWT authentication:
-  {{- range .Values.env }}
-  {{- if eq .name "JWT_SECRET" }}
-  JWT Secret: {{ .value }}
-  {{- end }}
+  {{- if .Values.jwtSecret }}
+  JWT Secret: {{ .Values.jwtSecret }}
   {{- end }}
   Admin user creation: Runs automatically on startup
 

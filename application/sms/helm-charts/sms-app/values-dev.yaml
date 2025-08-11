@@ -5,7 +5,7 @@
 #   - Add "127.0.0.1 sms-app.local" to /etc/hosts
 
 global:
-  environment: local
+  environment: development
   domain: sms-app.local
 
 # Main ingress configuration for path-based routing
@@ -127,6 +127,7 @@ mongodb:
 # Auth Service Configuration for Local Development
 ##############################################################################
 auth-service:
+  enabled: true
   replicaCount: 1
   name: ""
   image:
@@ -154,15 +155,11 @@ auth-service:
   autoscaling:
     enabled: false
 
+  # Environment variables now managed via ConfigMap and Secret
+  jwtSecret: "dev-jwt-secret-key-not-for-production"
+
   env:
-    - name: PORT
-      value: "8080"
-    - name: NODE_ENV
-      value: "development"
-    - name: MONGODB_URI
-      value: "mongodb://admin:password123@sms-mongodb:27017/smsapp?authSource=admin"
-    - name: JWT_SECRET
-      value: "dev-jwt-secret-key-not-for-production"
+    PORT: "8080"
 
   ingress:
     enabled: false
@@ -176,6 +173,7 @@ auth-service:
 
 # Course Service Configuration for Local Development
 course-service:
+  enabled: true
   replicaCount: 1 # Single replica for local dev
 
   image:
@@ -205,8 +203,6 @@ course-service:
 
   env:
     PORT: "8081"
-    NODE_ENV: "development"
-    MONGODB_URI: "mongodb://admin:password123@sms-mongodb:27017/smsapp?authSource=admin"
 
   ingress:
     enabled: false
@@ -219,6 +215,7 @@ course-service:
 
 # Student Service Configuration for Local Development
 student-service:
+  enabled: true
   replicaCount: 1 # Single replica for local dev
 
   image:
@@ -244,8 +241,6 @@ student-service:
 
   env:
     PORT: "8082"
-    NODE_ENV: "development"
-    MONGODB_URI: "mongodb://admin:password123@sms-mongodb:27017/smsapp?authSource=admin"
 
   ingress:
     enabled: false
