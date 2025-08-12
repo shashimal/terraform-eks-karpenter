@@ -8,6 +8,12 @@ variable "cluster_name" {
   type        = string
 }
 
+variable "namespace" {
+  description = "Namespace"
+  type = string
+  default = "default"
+}
+
 variable "vpc_id" {
   description = "VPC Id"
   type        = string
