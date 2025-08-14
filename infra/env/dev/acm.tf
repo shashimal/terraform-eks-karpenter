@@ -12,15 +12,6 @@ module "acm" {
 }
 
 
-resource "aws_route53_zone" "sms" {
-  name = "sms.duleendra.com"
-
-  tags = {
-    Name = local.app_name
-  }
-}
-
-
 resource "aws_route53_record" "acm_validation" {
   for_each = {
     for dvo in module.acm.acm_certificate_domain_validation_options : dvo.domain_name => {
@@ -35,5 +26,5 @@ resource "aws_route53_record" "acm_validation" {
   records         = [each.value.record]
   ttl             = 60
   type            = each.value.type
-  zone_id         = aws_route53_zone.sms.zone_id
+  zone_id         = local.sms_duleendra_zone
 }

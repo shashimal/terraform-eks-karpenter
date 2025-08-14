@@ -3,6 +3,8 @@ locals {
 
   env = "dev"
 
+  sms_duleendra_zone=""
+
   common_tags = {
     Name = local.app_name
     env  = local.env
