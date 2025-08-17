@@ -55,3 +55,34 @@ module "internet_sg" {
     }
   ]
 }
+module "ingress_traffic_sg" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "~> 5.0"
+
+  name        = "app-sg"
+  description = "Security group allowing all traffic from internet_sg"
+  vpc_id      = module.vpc.vpc_id
+
+  # ingress
+  ingress_with_source_security_group_id = [
+    {
+      from_port                = 0
+      to_port                  = 65535
+      protocol                 = "tcp"
+      description              = "All TCP traffic from internet_sg"
+      source_security_group_id = module.internet_sg.security_group_id
+    }
+  ]
+
+  # egress
+  egress_with_cidr_blocks = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      description = "All outbound traffic"
+      cidr_blocks = "0.0.0.0/0"
+    }
+  ]
+}
+

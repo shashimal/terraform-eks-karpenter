@@ -17,7 +17,7 @@ locals {
           }
         },
         {
-          id = module.internet_sg.security_group_id
+          id = module.ingress_traffic_sg.security_group_id
 
         }
         # {
