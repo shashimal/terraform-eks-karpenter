@@ -2,7 +2,7 @@ module "acm" {
   source                    = "terraform-aws-modules/acm/aws"
   version                   = "~> 4.0"
   domain_name               = "sms.duleendra.com"
-  zone_id                   = aws_route53_zone.sms.zone_id
+  zone_id                   = local.sms_duleendra_zone
   subject_alternative_names = []
 
   wait_for_validation = false

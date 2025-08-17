@@ -15,8 +15,8 @@ spec:
       labels:
         {{- include "course-service.selectorLabels" . | nindent 8 }}
     spec:
-      {{- if and (eq .Values.global.environment "production") .Values.secretsManager.enabled }}
-      serviceAccountName: {{ .Release.Name }}-secrets-sa
+      {{- if and (eq (.Values.global.environment | default "development") "production") (.Values.secretsManager.enabled | default false) }}
+      serviceAccountName: secrets-manager-sa
       {{- end }}
       initContainers:
         - name: wait-for-mongodb
@@ -54,7 +54,7 @@ spec:
                 secretKeyRef:
                   name: {{ .Release.Name }}-secret
                   key: MONGODB_URI
-          {{- if and (eq .Values.global.environment "production") .Values.secretsManager.enabled }}
+          {{- if and (eq (.Values.global.environment | default "development") "production") (.Values.secretsManager.enabled | default false) }}
           volumeMounts:
             - name: secrets-store
               mountPath: "/mnt/secrets-store"
@@ -86,7 +86,7 @@ spec:
             failureThreshold: 30
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      {{- if and (eq .Values.global.environment "production") .Values.secretsManager.enabled }}
+      {{- if and (eq (.Values.global.environment | default "development") "production") (.Values.secretsManager.enabled | default false) }}
       volumes:
         - name: secrets-store
           csi:

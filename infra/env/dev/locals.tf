@@ -1,9 +1,9 @@
 locals {
-  app_name = "student-management-sys"
+  app_name = "student-management-system"
 
   env = "dev"
 
-  sms_duleendra_zone=""
+  sms_duleendra_zone="Z025694321K6R42BEU4O"
 
   common_tags = {
     Name = local.app_name
@@ -39,6 +39,13 @@ locals {
   })
 
   ecr_repositories = {
+
+    frontend = {
+      repository_name                 = "frontend"
+      repository_image_tag_mutability = "MUTABLE"
+      repository_lifecycle_policy     = local.repository_lifecycle_policy
+    }
+
     student-service = {
       repository_name                 = "student-service"
       repository_image_tag_mutability = "MUTABLE"
@@ -47,6 +54,12 @@ locals {
 
     course-service = {
       repository_name                 = "course-service"
+      repository_image_tag_mutability = "MUTABLE"
+      repository_lifecycle_policy     = local.repository_lifecycle_policy
+    }
+
+    auth-service = {
+      repository_name                 = "auth-service"
       repository_image_tag_mutability = "MUTABLE"
       repository_lifecycle_policy     = local.repository_lifecycle_policy
     }

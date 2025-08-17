@@ -2,6 +2,7 @@
 # Required for persistent volumes in StatefulSet
 module "ebs_csi_driver_irsa" {
   source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "5.6"
 
   role_name = "${var.cluster_name}-ebs-csi-driver-role"
 

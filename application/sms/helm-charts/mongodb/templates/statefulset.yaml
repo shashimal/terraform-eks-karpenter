@@ -31,13 +31,13 @@ spec:
             - name: MONGO_INITDB_ROOT_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.auth.centralizedSecretName | default (printf "%s-credentials" (include "mongodb.fullname" .)) }}
-                  key: username
+                  name: {{ .Values.auth.centralizedSecretName | default (printf "%s-secret" (include "sms-app.fullname" .)) }}
+                  key: MONGODB_USERNAME
             - name: MONGO_INITDB_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.auth.centralizedSecretName | default (printf "%s-credentials" (include "mongodb.fullname" .)) }}
-                  key: password
+                  name: {{ .Values.auth.centralizedSecretName | default (printf "%s-secret" (include "sms-app.fullname" .)) }}
+                  key: MONGODB_PASSWORD
             {{- else if .Values.auth.enabled }}
             # Local development configuration - using centralized dev secret
             - name: MONGO_INITDB_ROOT_USERNAME
@@ -101,7 +101,7 @@ spec:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: {{ include "mongodb.fullname" . }}-secrets
+              secretProviderClass: {{ include "sms-app.fullname" . }}-secrets
         {{- end }}
         {{- if .Values.volumes }}
         {{- toYaml .Values.volumes | nindent 8 }}

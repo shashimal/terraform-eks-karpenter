@@ -45,9 +45,16 @@ resource "helm_release" "aws_load_balancer_controller" {
 
 module "aws_load_balancer_controller_irsa_role" {
   source    = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  role_name = "aws-load-balancer-controller"
+  version = "5.6"
+
+  role_name = "${var.cluster_name}-aws-load-balancer-controller"
 
   attach_load_balancer_controller_policy = true
+
+  role_policy_arns = {
+    extra = aws_iam_policy.lb_extra.arn
+  }
+
 
   oidc_providers = {
     ex = {
@@ -55,6 +62,23 @@ module "aws_load_balancer_controller_irsa_role" {
       namespace_service_accounts = ["kube-system:aws-load-balancer-controller"]
     }
   }
+}
+
+
+resource "aws_iam_policy" "lb_extra" {
+  name        = "AWSLoadBalancerControllerExtraPolicy"
+  description = "Extra permissions for AWS LB Controller"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["elasticloadbalancing:AddTags"]
+        Resource = "*"
+      }
+    ]
+  })
 }
 
 resource "kubernetes_service_account" "aws_load_balancer_controller" {

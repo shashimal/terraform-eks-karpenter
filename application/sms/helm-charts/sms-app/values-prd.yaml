@@ -12,8 +12,9 @@ global:
 # AWS Secrets Manager Configuration for Production
 secretsManager:
   enabled: true
-  mongodbSecretName: "sms-app/mongodb-credentials"
-  jwtSecretName: "sms-app/jwt-secret"
+  #mongodbSecretName: "sms-app/mongodb-credentials"
+  appSecretName: "sms-app"
+  #jwtSecretName: "sms-app/jwt-secret"
   serviceAccount:
     roleArn: "arn:aws:iam::YOUR_ACCOUNT_ID:role/sms-app-secrets-manager-role"
 
@@ -29,27 +30,24 @@ ingress:
 
     # SSL/TLS Configuration
     alb.ingress.kubernetes.io/ssl-redirect: "443"
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-west-2:123456789012:certificate/your-cert-arn
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:793209430381:certificate/9767ed9e-03e1-4959-bc54-a5f3bf3e8e9b
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
 
     # Health checks
-    alb.ingress.kubernetes.io/healthcheck-path: /health
-    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
-    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "5"
-    alb.ingress.kubernetes.io/healthy-threshold-count: "2"
-    alb.ingress.kubernetes.io/unhealthy-threshold-count: "3"
+    #alb.ingress.kubernetes.io/healthcheck-path: /health
+    #alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
+    #alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "5"
+    #alb.ingress.kubernetes.io/healthy-threshold-count: "2"
+    #alb.ingress.kubernetes.io/unhealthy-threshold-count: "3"
 
     # Security
-    alb.ingress.kubernetes.io/security-groups: sg-xxxxxxxxx
-    alb.ingress.kubernetes.io/subnets: subnet-xxxxxxxx,subnet-yyyyyyyy
+    alb.ingress.kubernetes.io/security-groups: sg-04d6cb226590ab36c
+    alb.ingress.kubernetes.io/subnets: subnet-0d79b252ee2da5a87,subnet-0ac949ddb342a00ee
 
     # Performance
     alb.ingress.kubernetes.io/load-balancer-attributes: |
       idle_timeout.timeout_seconds=60,
-      routing.http2.enabled=true,
-      access_logs.s3.enabled=true,
-      access_logs.s3.bucket=your-alb-logs-bucket,
-      access_logs.s3.prefix=sms-app
+      routing.http2.enabled=true
 
     # WAF (optional)
     # alb.ingress.kubernetes.io/wafv2-acl-arn: arn:aws:wafv2:us-west-2:123456789012:regional/webacl/your-waf-acl/xxxxx
@@ -89,10 +87,10 @@ ingress:
 # Frontend Service Configuration for EKS Production
 ##############################################################################
 frontend:
-  replicaCount: 3 # Multiple replicas for HA
+  replicaCount: 2 # Multiple replicas for HA
 
   image:
-    repository: sms-frontend
+    repository: 793209430381.dkr.ecr.ap-southeast-1.amazonaws.com/frontend
     tag: "latest"
     pullPolicy: IfNotPresent
 
@@ -136,20 +134,21 @@ mongodb:
     pullPolicy: IfNotPresent
 
   serviceAccount:
-    create: true
+    create: false
     annotations: {}
+    name: "secrets-manager-sa"
 
   # Use centralized AWS Secrets Manager for production
   secretsManager:
     enabled: true
     # This will be managed by the centralized SecretProviderClass in sms-app
-    secretName: "sms-app/mongodb-credentials"
+    secretName: "sms-app"
 
   # Production MongoDB authentication
   auth:
-    enabled: true
+    enabled: false
     # Use centralized secret name from parent chart
-    centralizedSecretName: "sms-app-mongodb-credentials"
+    centralizedSecretName: "sms-secret"
     database: "smsapp"
 
   persistence:
@@ -157,8 +156,8 @@ mongodb:
     size: 20Gi # Larger storage for production
     accessModes:
       - ReadWriteOnce
-    # Use EBS gp3 storage class for better performance
-    storageClass: "gp3"
+    # Use EBS gp2 storage class (available in cluster)
+    storageClass: "gp2"
 
   resources:
     # Production-appropriate resources
@@ -188,11 +187,11 @@ mongodb:
 ##############################################################################
 auth-service:
   enabled: true
-  replicaCount: 2
+  replicaCount: 1
 
   image:
-    repository: shashimald/auth-service
-    tag: "v1.0.0"
+    repository: 793209430381.dkr.ecr.ap-southeast-1.amazonaws.com/auth-service
+    tag: "latest"
     pullPolicy: IfNotPresent
 
   serviceAccount:
@@ -217,6 +216,10 @@ auth-service:
     minReplicas: 2
     maxReplicas: 5
     targetCPUUtilizationPercentage: 70
+
+  # Pass secretsManager config to subchart
+  secretsManager:
+    enabled: true
 
   # Environment variables now managed via ConfigMap and Secret
   jwtSecret: "CHANGE_THIS_STRONG_JWT_SECRET_IN_PRODUCTION"
@@ -245,11 +248,11 @@ auth-service:
 ##############################################################################
 course-service:
   enabled: true
-  replicaCount: 2
+  replicaCount: 1
 
   image:
-    repository: shashimald/course-service
-    tag: "v1.0.2"
+    repository: 793209430381.dkr.ecr.ap-southeast-1.amazonaws.com/course-service
+    tag: "latest"
     pullPolicy: IfNotPresent
 
   service:
@@ -269,6 +272,10 @@ course-service:
     minReplicas: 2
     maxReplicas: 5
     targetCPUUtilizationPercentage: 70
+
+  # Pass secretsManager config to subchart
+  secretsManager:
+    enabled: true
 
   mongodb:
     host: "sms-mongodb"
@@ -298,11 +305,11 @@ course-service:
 ##############################################################################
 student-service:
   enabled: true
-  replicaCount: 2
+  replicaCount: 1
 
   image:
-    repository: shashimald/student-service
-    tag: "v1.0.0"
+    repository: 793209430381.dkr.ecr.ap-southeast-1.amazonaws.com/student-service
+    tag: "latest"
     pullPolicy: IfNotPresent
 
   service:
@@ -323,6 +330,10 @@ student-service:
     maxReplicas: 5
     targetCPUUtilizationPercentage: 70
 
+  # Pass secretsManager config to subchart
+  secretsManager:
+    enabled: true
+
   env:
     PORT: "8082"
 
@@ -337,7 +348,7 @@ student-service:
     enabled: true
     size: 10Gi
     accessMode: ReadWriteOnce
-    storageClass: "gp3" # EKS optimized storage class
+    storageClass: "gp2" # Available EKS storage class
     mountPath: "/app/uploads"
 
   livenessProbe:

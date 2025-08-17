@@ -1,6 +1,6 @@
 # Install Secrets Store CSI Driver using Helm
 resource "helm_release" "secrets_store_csi_driver" {
-  name       = "secrets-store-csi-driver"
+  name       = "${var.cluster_name}-secrets-store-csi-driver"
   repository = "https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts"
   chart      = "secrets-store-csi-driver"
   namespace  = "kube-system"
@@ -33,7 +33,7 @@ resource "helm_release" "aws_secrets_manager_csi_provider" {
 module "secrets_store_csi_driver_irsa" {
   source    = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version   = "~> 5.0"
-  role_name = "secrets-store-csi-driver-role"
+  role_name = "${var.cluster_name}-secrets-store-csi-driver-role"
 
   role_policy_arns = {
     secrets_manager = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"

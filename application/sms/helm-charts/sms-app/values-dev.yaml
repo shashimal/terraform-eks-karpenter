@@ -88,7 +88,7 @@ mongodb:
     pullPolicy: IfNotPresent
 
   serviceAccount:
-    create: true
+    create: false
     # Remove AWS IAM role annotations for local development
     annotations: {}
 
@@ -159,6 +159,10 @@ auth-service:
   autoscaling:
     enabled: false
 
+  # Pass secretsManager config to subchart
+  secretsManager:
+    enabled: false
+
   # Environment variables now managed via ConfigMap and Secret
   jwtSecret: "dev-jwt-secret-key-not-for-production"
 
@@ -201,6 +205,10 @@ course-service:
   autoscaling:
     enabled: false # No autoscaling in local dev
 
+  # Pass secretsManager config to subchart
+  secretsManager:
+    enabled: false
+
   mongodb:
     host: "sms-mongodb"
     port: 27017
@@ -242,6 +250,10 @@ student-service:
 
   autoscaling:
     enabled: false # No autoscaling in local dev
+
+  # Pass secretsManager config to subchart
+  secretsManager:
+    enabled: false
 
   env:
     PORT: "8082"

@@ -15,8 +15,8 @@ spec:
       labels:
         {{- include "student-service.selectorLabels" . | nindent 8 }}
     spec:
-      {{- if and (eq .Values.global.environment "production") .Values.secretsManager.enabled }}
-      serviceAccountName: {{ .Release.Name }}-secrets-sa
+      {{- if and (eq (.Values.global.environment | default "development") "production") (.Values.secretsManager.enabled | default false) }}
+      serviceAccountName: secrets-manager-sa
       {{- end }}
       initContainers:
         - name: wait-for-mongodb
@@ -54,14 +54,13 @@ spec:
                 secretKeyRef:
                   name: {{ .Release.Name }}-secret
                   key: MONGODB_URI
-          {{- if and (eq .Values.global.environment "production") .Values.secretsManager.enabled }}
           volumeMounts:
+          {{- if and (eq (.Values.global.environment | default "development") "production") (.Values.secretsManager.enabled | default false) }}
             - name: secrets-store
               mountPath: "/mnt/secrets-store"
               readOnly: true
           {{- end }}
           {{- if .Values.persistence.enabled }}
-          volumeMounts:
             - name: uploads
               mountPath: {{ .Values.persistence.mountPath }}
           {{- end }}
@@ -97,7 +96,7 @@ spec:
           persistentVolumeClaim:
             claimName: {{ include "student-service.fullname" . }}-uploads
         {{- end }}
-        {{- if and (eq .Values.global.environment "production") .Values.secretsManager.enabled }}
+        {{- if and (eq (.Values.global.environment | default "development") "production") (.Values.secretsManager.enabled | default false) }}
         - name: secrets-store
           csi:
             driver: secrets-store.csi.k8s.io
