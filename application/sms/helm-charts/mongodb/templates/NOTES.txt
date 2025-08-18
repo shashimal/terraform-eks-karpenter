@@ -1,0 +1,47 @@
+1. Get the MongoDB connection string by running these commands:
+
+{{- if .Values.secretsManager.enabled }}
+   MongoDB credentials are managed by AWS Secrets Manager.
+   
+   kubectl get secret {{ include "mongodb.fullname" . }}-credentials -o jsonpath="{.data.username}" | base64 --decode
+   kubectl get secret {{ include "mongodb.fullname" . }}-credentials -o jsonpath="{.data.password}" | base64 --decode
+
+{{- else if .Values.auth.enabled }}
+   MongoDB credentials are stored in a Kubernetes secret.
+   
+   Username: {{ .Values.auth.username }}
+   Password: {{ .Values.auth.password }}
+   
+   kubectl get secret {{ include "mongodb.fullname" . }}-auth -o jsonpath="{.data.username}" | base64 --decode
+   kubectl get secret {{ include "mongodb.fullname" . }}-auth -o jsonpath="{.data.password}" | base64 --decode
+{{- end }}
+
+2. Connect to MongoDB:
+
+   kubectl run --namespace {{ .Release.Namespace }} {{ include "mongodb.fullname" . }}-client --rm --tty -i --restart='Never' --image mongo:{{ .Values.image.tag | default .Chart.AppVersion }} --command -- bash
+
+   # From within the pod:
+   {{- if .Values.auth.enabled }}
+   mongo --host {{ include "mongodb.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }} -u {{ .Values.auth.username }} -p {{ .Values.auth.password }}
+   {{- else }}
+   mongo --host {{ include "mongodb.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }} -u <username> -p <password>
+   {{- end }}
+
+3. To connect from outside the cluster:
+
+   kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "mongodb.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+   
+   # Then connect to localhost:{{ .Values.service.port }}
+
+{{- if .Values.persistence.enabled }}
+4. Persistent storage is enabled. Data will be preserved across pod restarts.
+   Storage size: {{ .Values.persistence.size }}
+{{- else }}
+4. WARNING: Persistent storage is disabled. Data will be lost when pods are restarted.
+{{- end }}
+
+{{- if eq .Values.replicaCount 1.0 }}
+5. Running in single instance mode (not recommended for production).
+{{- else }}
+5. Running {{ .Values.replicaCount }} MongoDB replicas.
+{{- end }}

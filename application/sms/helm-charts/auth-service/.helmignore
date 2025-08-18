@@ -1,0 +1,31 @@
+# Patterns to ignore when building packages.
+.DS_Store
+.git/
+.gitignore
+.bzr/
+.bzrignore
+.hg/
+.hgignore
+.svn/
+*.swp
+*.bak
+*.tmp
+*.orig
+*~
+.project
+.idea/
+*.tmproj
+.vscode/
+
+# Terraform files
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfplan
+terraform-provider-*
+
+# Other large files
+*.tar.gz
+*.zip
+*.tgz

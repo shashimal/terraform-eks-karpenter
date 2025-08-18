@@ -1,0 +1,57 @@
+🚀 SMS Application has been deployed!
+
+📋 Deployment Summary:
+- Release Name: {{ .Release.Name }}
+- Namespace: {{ .Release.Namespace }}
+- Environment: {{ .Values.global.environment | default "unknown" }}
+
+🌐 Frontend Access:
+{{- if .Values.frontend.ingress.enabled }}
+{{- range .Values.frontend.ingress.hosts }}
+  - http{{ if $.Values.frontend.ingress.tls }}s{{ end }}://{{ .host }}{{ range .paths }}{{ .path }}{{ end }}
+{{- end }}
+
+To get the ingress IP:
+  kubectl get ingress {{ .Release.Name }}-frontend -n {{ .Release.Namespace }}
+{{- else }}
+  Frontend ingress is disabled. To access the frontend:
+  kubectl port-forward svc/{{ .Release.Name }}-frontend {{ .Values.frontend.service.port }}:{{ .Values.frontend.service.port }} -n {{ .Release.Namespace }}
+  Then visit: http://localhost:{{ .Values.frontend.service.port }}
+{{- end }}
+
+🗄️  MongoDB Access:
+{{- if .Values.mongodb.secretsManager.enabled }}
+  MongoDB credentials are managed by AWS Secrets Manager.
+  Secret name: {{ .Values.mongodb.secretsManager.secretName }}
+{{- else if .Values.mongodb.auth.enabled }}
+  MongoDB credentials:
+  - Username: {{ .Values.mongodb.auth.username }}
+  - Password: {{ .Values.mongodb.auth.password }}
+  - Database: {{ .Values.mongodb.auth.database | default "admin" }}
+{{- end }}
+
+To connect to MongoDB:
+  kubectl port-forward svc/{{ .Release.Name }}-mongodb 27017:27017 -n {{ .Release.Namespace }}
+
+📊 Resource Status:
+Check the status of your deployment:
+  kubectl get pods -n {{ .Release.Namespace }}
+  kubectl get services -n {{ .Release.Namespace }}
+  kubectl get ingress -n {{ .Release.Namespace }}
+
+🔍 Troubleshooting:
+View logs:
+  kubectl logs -f deployment/{{ .Release.Name }}-frontend -n {{ .Release.Namespace }}
+  kubectl logs -f statefulset/{{ .Release.Name }}-mongodb -n {{ .Release.Namespace }}
+
+📚 Next Steps:
+{{- if eq .Values.global.environment "local" }}
+1. Add "127.0.0.1 {{ .Values.global.domain }}" to your /etc/hosts file
+2. Access the application at: http://{{ .Values.global.domain }}
+{{- else }}
+1. Configure your DNS to point to the load balancer
+2. Set up SSL certificates if needed
+3. Configure monitoring and logging
+{{- end }}
+
+Happy coding! 🎉

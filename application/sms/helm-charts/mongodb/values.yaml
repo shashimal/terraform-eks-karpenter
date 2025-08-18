@@ -1,0 +1,100 @@
+# Default values for mongodb.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 3
+
+image:
+  repository: mongo
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "6.0"
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::ACCOUNT_ID:role/mongodb-secrets-role"
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+service:
+  type: ClusterIP
+  clusterIP: None # Headless service for StatefulSet
+  port: 27017
+  annotations: {}
+
+# AWS Secrets Manager configuration
+secretsManager:
+  # Enable/disable AWS Secrets Manager integration
+  enabled: true
+  # Name of the secret in AWS Secrets Manager
+  secretName: "mongodb-credentials"
+  # Additional fields to extract from the secret (optional)
+  additionalFields: []
+  # Example:
+  # additionalFields:
+  #   - path: "database"
+  #     alias: "database"
+
+# Local development authentication (used when secretsManager.enabled is false)
+auth:
+  enabled: false
+  username: "admin"
+  password: "password123"
+  database: "admin"
+  # Name of the centralized secret containing MongoDB credentials
+  # If not specified, defaults to "<release-name>-secret"
+  centralizedSecretName: ""
+
+# Persistence configuration
+persistence:
+  enabled: true
+  size: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  # storageClass: "gp3"
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+# Health checks
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+
+# Additional environment variables
+env: []
+# Example:
+# env:
+#   - name: MONGO_INITDB_DATABASE
+#     value: "myapp"
+
+# Additional volume mounts
+volumeMounts: []
+
+# Additional volumes
+volumes: []

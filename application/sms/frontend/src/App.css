@@ -1,0 +1,215 @@
+/* Custom styling on top of Bootstrap */
+
+:root {
+    --primary: #2a9d8f;
+    --secondary: #6c757d;
+    --success: #38b000;
+    --info: #0096c7;
+    --warning: #ffb703;
+    --danger: #e63946;
+    --light: #f8f9fa;
+    --dark: #264653;
+}
+
+.App {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+}
+
+/* Override Bootstrap colors */
+.bg-primary {
+    background-color: var(--primary) !important;
+}
+
+.btn-primary {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #238b7e !important;
+    border-color: #238b7e !important;
+}
+
+.btn-outline-primary {
+    color: var(--primary) !important;
+    border-color: var(--primary) !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background-color: var(--primary) !important;
+    color: white !important;
+}
+
+.text-primary {
+    color: var(--primary) !important;
+}
+
+.border-primary {
+    border-color: var(--primary) !important;
+}
+
+/* Custom navbar styling */
+.navbar-brand {
+    font-weight: 600;
+}
+
+.navbar-dark .navbar-nav .nav-link.active {
+    color: white;
+    font-weight: 500;
+}
+
+/* Card hover effects */
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Custom button styling */
+.btn {
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s;
+}
+
+.btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Table styling */
+.table th {
+    font-weight: 600;
+    border-top: none;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(42, 157, 143, 0.05);
+}
+
+/* Form styling */
+.form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(42, 157, 143, 0.25);
+    border-color: var(--primary);
+}
+
+/* Page transitions */
+.fade-enter {
+    opacity: 0;
+}
+
+.fade-enter-active {
+    opacity: 1;
+    transition: opacity 300ms;
+}
+
+.fade-exit {
+    opacity: 1;
+}
+
+.fade-exit-active {
+    opacity: 0;
+    transition: opacity 300ms;
+}
+
+/* Custom badge styling */
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.75em;
+}
+
+/* Custom alert styling */
+.alert {
+    border-radius: 4px;
+}
+
+/* Custom spinner */
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+/* Page header styling */
+.page-header {
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 1rem;
+}
+
+/* Custom select styling */
+.basic-multi-select {
+    width: 100%;
+}
+
+/* Custom card header */
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    padding: 1rem;
+}
+
+/* Custom footer */
+.footer {
+    margin-top: auto;
+    padding: 1rem 0;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .btn {
+        padding: 0.375rem 0.75rem;
+    }
+
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+}
+
+/* Animation for notifications */
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.toast-notification {
+    animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}

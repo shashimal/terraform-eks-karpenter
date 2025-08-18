@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "mongodb.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mongodb.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "mongodb.fullname" . }}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "mongodb.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "mongodb.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      containers:
+        - name: mongodb
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: mongodb
+              containerPort: 27017
+              protocol: TCP
+          env:
+            {{- if .Values.secretsManager.enabled }}
+            # AWS Secrets Manager configuration - using centralized secret from parent chart
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auth.centralizedSecretName | default (printf "%s-secret" (include "sms-app.fullname" .)) }}
+                  key: MONGODB_USERNAME
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auth.centralizedSecretName | default (printf "%s-secret" (include "sms-app.fullname" .)) }}
+                  key: MONGODB_PASSWORD
+            {{- else if .Values.auth.enabled }}
+            # Local development configuration - using centralized dev secret
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auth.centralizedSecretName | default (printf "%s-secret" (include "sms-app.fullname" .)) }}
+                  key: username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auth.centralizedSecretName | default (printf "%s-secret" (include "sms-app.fullname" .)) }}
+                  key: password
+            {{- if .Values.auth.database }}
+            - name: MONGO_INITDB_DATABASE
+              value: {{ .Values.auth.database | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.env }}
+            {{- toYaml .Values.env | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            {{- if .Values.persistence.enabled }}
+            - name: mongodb-data
+              mountPath: /data/db
+            {{- end }}
+            {{- if .Values.secretsManager.enabled }}
+            - name: secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
+            {{- end }}
+            {{- if .Values.volumeMounts }}
+            {{- toYaml .Values.volumeMounts | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            exec:
+              command:
+                - mongo
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            tcpSocket:
+              port: 27017
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          {{- end }}
+      volumes:
+        {{- if .Values.secretsManager.enabled }}
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ include "sms-app.fullname" . }}-secrets
+        {{- end }}
+        {{- if .Values.volumes }}
+        {{- toYaml .Values.volumes | nindent 8 }}
+        {{- end }}
+  {{- if .Values.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: mongodb-data
+        labels:
+          {{- include "mongodb.labels" . | nindent 10 }}
+      spec:
+        accessModes: 
+          {{- toYaml .Values.persistence.accessModes | nindent 10 }}
+        {{- if .Values.persistence.storageClass }}
+        storageClassName: {{ .Values.persistence.storageClass }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}
+  {{- end }}

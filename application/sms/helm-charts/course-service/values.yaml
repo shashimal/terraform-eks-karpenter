@@ -1,0 +1,69 @@
+# Default values for course-service.
+replicaCount: 2
+
+image:
+  repository: course-service
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  ingressClassName: ""
+  annotations: {}
+  hosts:
+    - host: courses.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+# Environment variables
+env:
+  - name: PORT
+    value: "8081"
+  - name: NODE_ENV
+    value: "production"
+
+# Health check configuration
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /ready
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5

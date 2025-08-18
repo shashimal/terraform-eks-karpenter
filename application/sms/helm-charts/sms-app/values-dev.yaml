@@ -1,0 +1,279 @@
+# Local Minikube Development Environment Overrides
+# Use with: helm install sms-app ./sms-app -f values-dev.yaml
+# Prerequisites:
+#   - minikube addons enable ingress
+#   - Add "127.0.0.1 sms-app.local" to /etc/hosts
+
+global:
+  environment: development
+  domain: sms-app.local
+
+# AWS Secrets Manager Configuration (disabled for development)
+secretsManager:
+  enabled: false
+
+# Main ingress configuration for path-based routing
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: sms-app.local
+      paths:
+        - path: /api/auth
+          pathType: Prefix
+          serviceName: sms-auth-service
+          servicePort: 80
+        - path: /api/users
+          pathType: Prefix
+          serviceName: sms-auth-service
+          servicePort: 80
+        - path: /api/courses
+          pathType: Prefix
+          serviceName: sms-course-service
+          servicePort: 80
+        - path: /api/students
+          pathType: Prefix
+          serviceName: sms-student-service
+          servicePort: 80
+        - path: /
+          pathType: Prefix
+          serviceName: sms-frontend
+          servicePort: 80
+  tls: []
+
+##############################################################################
+# Frontend Service Configuration for Local Development
+##############################################################################
+frontend:
+  replicaCount: 1
+
+  image:
+    repository: sms-frontend
+    tag: "latest"
+    pullPolicy: Never
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 80
+
+  ingress:
+    enabled: false
+  env:
+    REACT_APP_STUDENT_API_URL: "/api/students"
+    REACT_APP_COURSE_API_URL: "/api/courses"
+    REACT_APP_AUTH_API_URL: "/api/auth"
+    REACT_APP_USER_API_URL: "/api/users"
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+  autoscaling:
+    enabled: false
+
+##############################################################################
+# Mongodb Service Configuration for Local Development
+##############################################################################
+
+mongodb:
+  replicaCount: 1 # Single MongoDB instance for local dev
+
+  image:
+    tag: "6.0"
+    pullPolicy: IfNotPresent
+
+  serviceAccount:
+    create: false
+    # Remove AWS IAM role annotations for local development
+    annotations: {}
+
+  # Disable AWS Secrets Manager for local development
+  # Use regular Kubernetes secrets instead
+  secretsManager:
+    enabled: false
+
+  # Create a simple secret for local development
+  auth:
+    enabled: true
+    username: "admin"
+    password: "password123" # Simple password for local dev
+    database: "smsapp"
+
+  persistence:
+    enabled: true
+    size: 1Gi # Very small storage for local dev
+    accessModes:
+      - ReadWriteOnce
+    # Override AWS gp2 storage class with minikube's default
+    storageClass: "standard" # Minikube's default storage class
+
+  resources:
+    # Minimal resources for local development
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  # Disable health checks for faster startup in local dev
+  livenessProbe:
+    enabled: false
+  readinessProbe:
+    enabled: false
+
+##############################################################################
+# Auth Service Configuration for Local Development
+##############################################################################
+auth-service:
+  enabled: true
+  replicaCount: 1
+  name: ""
+  image:
+    repository: shashimald/auth-service
+    tag: "v1.0.0"
+    pullPolicy: IfNotPresent
+
+  serviceAccount:
+    create: false
+    automount: true
+    annotations: {}
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  autoscaling:
+    enabled: false
+
+  # Pass secretsManager config to subchart
+  secretsManager:
+    enabled: false
+
+  # Environment variables now managed via ConfigMap and Secret
+  jwtSecret: "dev-jwt-secret-key-not-for-production"
+
+  env:
+    PORT: "8080"
+
+  ingress:
+    enabled: false
+
+  livenessProbe:
+    enabled: false
+  readinessProbe:
+    enabled: false
+
+##############################################################################
+
+# Course Service Configuration for Local Development
+course-service:
+  enabled: true
+  replicaCount: 1 # Single replica for local dev
+
+  image:
+    repository: shashimald/course-service
+    tag: "v1.0.2"
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  resources:
+    # Minimal resources for local development
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  autoscaling:
+    enabled: false # No autoscaling in local dev
+
+  # Pass secretsManager config to subchart
+  secretsManager:
+    enabled: false
+
+  mongodb:
+    host: "sms-mongodb"
+    port: 27017
+
+  env:
+    PORT: "8081"
+
+  ingress:
+    enabled: false
+
+  # Disable health checks for faster startup in local dev
+  livenessProbe:
+    enabled: false
+  readinessProbe:
+    enabled: false
+
+# Student Service Configuration for Local Development
+student-service:
+  enabled: true
+  replicaCount: 1 # Single replica for local dev
+
+  image:
+    repository: shashimald/student-service
+    tag: "v1.0.0"
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  resources:
+    # Minimal resources for local development
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  autoscaling:
+    enabled: false # No autoscaling in local dev
+
+  # Pass secretsManager config to subchart
+  secretsManager:
+    enabled: false
+
+  env:
+    PORT: "8082"
+
+  ingress:
+    enabled: false
+
+  mongodb:
+    host: "sms-mongodb"
+    port: 27017
+
+  persistence:
+    enabled: true
+    size: 1Gi
+    accessMode: ReadWriteOnce
+    storageClass: "standard"
+    mountPath: "/app/uploads"
+
+  # Disable health checks for faster startup in local dev
+  livenessProbe:
+    enabled: false
+  readinessProbe:
+    enabled: false
