@@ -49,9 +49,9 @@ frontend:
   replicaCount: 1
 
   image:
-    repository: sms-frontend
+    repository: shashimald/frontend
     tag: "latest"
-    pullPolicy: Never
+    pullPolicy: Always
 
   service:
     type: ClusterIP
@@ -136,7 +136,7 @@ auth-service:
   name: ""
   image:
     repository: shashimald/auth-service
-    tag: "v1.0.0"
+    tag: "latest"
     pullPolicy: IfNotPresent
 
   serviceAccount:
@@ -186,7 +186,7 @@ course-service:
 
   image:
     repository: shashimald/course-service
-    tag: "v1.0.2"
+    tag: "latest"
     pullPolicy: IfNotPresent
 
   service:
@@ -232,7 +232,7 @@ student-service:
 
   image:
     repository: shashimald/student-service
-    tag: "v1.0.0"
+    tag: "latest"
     pullPolicy: IfNotPresent
 
   service:

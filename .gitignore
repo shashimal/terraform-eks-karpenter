@@ -65,3 +65,6 @@ application/sms/helm-charts/sms-app/charts/student-service/templates/deployment.
 application/sms/helm-charts/sms-app/charts/student-service/templates/NOTES.txt
 application/sms/helm-charts/sms-app/charts/student-service/templates/pvc.yaml
 application/sms/helm-charts/sms-app/charts/student-service/templates/service.yaml
+/application/sms/auth-service/node_modules/
+/application/sms/course-service/node_modules/
+/application/sms/student-service/node_modules/
